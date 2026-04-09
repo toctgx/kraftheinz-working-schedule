@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KHK Work Status Board</title>
+    <style>
+      @import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap');
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: 'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, sans-serif; background: #f4f6fb; color: #1d2433; }
+      .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 18px 80px; }
+      .hero { display: flex; justify-content: space-between; gap: 18px; align-items: end; margin-bottom: 24px; }
+      h1 { margin: 0; font-size: 46px; letter-spacing: -0.06em; }
+      .hero p { margin: 8px 0 0; color: #667085; }
+      .date-pill { background: #fff; border: 1px solid #e6e9f2; border-radius: 20px; padding: 14px 18px; font-weight: 700; box-shadow: 0 10px 24px rgba(15,23,42,0.05); }
+      .grid { display: grid; grid-template-columns: 360px 1fr; gap: 18px; align-items: start; }
+      .card { background: #fff; border: 1px solid #e7ebf3; border-radius: 28px; padding: 20px; box-shadow: 0 14px 30px rgba(15,23,42,0.05); }
+      .card h2 { margin: 0 0 14px; font-size: 24px; letter-spacing: -0.04em; }
+      .field { margin-bottom: 12px; }
+      .field label { display: block; font-size: 13px; color: #667085; margin-bottom: 6px; }
+      .field input, .field select { width: 100%; min-height: 48px; border: 1px solid #dde3ef; border-radius: 16px; padding: 0 14px; font: inherit; background: #fafbff; }
+      .button-row { display: flex; gap: 10px; margin-top: 14px; }
+      button { border: none; border-radius: 16px; min-height: 50px; padding: 0 18px; font: inherit; font-weight: 800; cursor: pointer; }
+      .primary { background: #4f46e5; color: #fff; }
+      .secondary { background: #eef2ff; color: #4338ca; }
+      .teams { display: grid; gap: 16px; }
+      .team-card { background: #fff; border: 1px solid #e7ebf3; border-radius: 28px; padding: 18px; box-shadow: 0 14px 30px rgba(15,23,42,0.04); }
+      .team-head { display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; }
+      .team-head h3 { margin:0; font-size: 22px; letter-spacing: -0.04em; }
+      .count { background:#eef2ff; color:#4338ca; border-radius:999px; padding:8px 12px; font-size:13px; font-weight:800; }
+      .member-list { display:grid; gap: 10px; }
+      .member { display:flex; justify-content:space-between; gap: 12px; align-items:center; border:1px solid #edf0f7; border-radius:20px; padding: 14px 16px; background:#fbfcff; }
+      .member strong { display:block; font-size:16px; }
+      .member span { font-size:13px; color:#667085; }
+      .status { display:inline-flex; align-items:center; justify-content:center; min-width:96px; min-height:38px; padding:0 12px; border-radius:999px; font-size:13px; font-weight:800; }
+      .office { background:#e8f7ec; color:#117a37; }
+      .remote { background:#e8f0ff; color:#2755d8; }
+      .vacation { background:#fff4db; color:#b26a00; }
+      .half { background:#ffe8ef; color:#c83b6b; }
+      .timeoff { background:#ede9fe; color:#6d28d9; }
+      .empty { color:#98a2b3; font-size:14px; }
+      .helper { color:#667085; font-size:13px; margin-top: 8px; }
+      @media (max-width: 960px) { .grid { grid-template-columns: 1fr; } .hero { display:block; } .date-pill { margin-top:14px; display:inline-block; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <section class="hero">
+        <div>
+          <h1>KHK Work Status Board</h1>
+          <p>오늘 누가 재택근무, 연차, 반차인지 한눈에 보는 심플 보드입니다.</p>
+        </div>
+        <div class="date-pill" id="todayLabel"></div>
+      </section>
+
+      <section class="grid">
+        <aside class="card">
+          <h2>오늘 상태 등록</h2>
+          <div class="field">
+            <label for="teamSelect">팀</label>
+            <select id="teamSelect"></select>
+          </div>
+          <div class="field">
+            <label for="nameInput">이름</label>
+            <input id="nameInput" placeholder="이름 입력 또는 선택" list="nameList" />
+            <datalist id="nameList"></datalist>
+          </div>
+          <div class="field">
+            <label for="statusSelect">근무 상태</label>
+            <select id="statusSelect">
+              <option value="office">출근</option>
+              <option value="remote">재택</option>
+              <option value="vacation">연차</option>
+              <option value="half-am">오전반차</option>
+              <option value="half-pm">오후반차</option>
+              <option value="timeoff">반반차 (시간 표시)</option>
+            </select>
+          </div>
+          <div class="field" id="timeField" style="display:none;">
+            <label for="timeInput">시간 표시</label>
+            <input id="timeInput" placeholder="예: 15:00~17:00" />
+          </div>
+          <div class="button-row">
+            <button class="primary" id="saveBtn">저장</button>
+            <button class="secondary" id="resetBtn">초기화</button>
+          </div>
+          <div class="helper">브라우저 저장 방식 데모입니다. 같은 기기에서는 새로고침 후에도 유지됩니다.</div>
+        </aside>
+
+        <main class="teams" id="teamsBoard"></main>
+      </section>
+    </div>
+
+    <script>
+      const teams = [
+        'sales team',
+        'mkt team',
+        'finance team',
+        's&op team',
+        'logistics team',
+        'hr',
+        'country manager'
+      ];
+
+      const defaultMembers = {
+        'sales team': ['Ahn', 'Minji', 'Jason'],
+        'mkt team': ['Sora', 'Jiyoon'],
+        'finance team': ['Daniel', 'Sujin'],
+        's&op team': ['Kevin', 'Hana'],
+        'logistics team': ['Nari', 'Brian'],
+        'hr': ['Mina'],
+        'country manager': ['Country Manager']
+      };
+
+      const statusMap = {
+        office: { label: '출근', className: 'office' },
+        remote: { label: '재택', className: 'remote' },
+        vacation: { label: '연차', className: 'vacation' },
+        'half-am': { label: '오전반차', className: 'half' },
+        'half-pm': { label: '오후반차', className: 'half' },
+        timeoff: { label: '반반차', className: 'timeoff' }
+      };
+
+      const storageKey = 'khk-work-status-demo';
+      const initialState = teams.reduce((acc, team) => {
+        acc[team] = defaultMembers[team].map(name => ({ name, status: 'office', timeNote: '' }));
+        return acc;
+      }, {});
+
+      const saved = localStorage.getItem(storageKey);
+      const state = saved ? JSON.parse(saved) : initialState;
+
+      const teamSelect = document.getElementById('teamSelect');
+      const nameInput = document.getElementById('nameInput');
+      const nameList = document.getElementById('nameList');
+      const statusSelect = document.getElementById('statusSelect');
+      const timeField = document.getElementById('timeField');
+      const timeInput = document.getElementById('timeInput');
+      const board = document.getElementById('teamsBoard');
+
+      const persist = () => localStorage.setItem(storageKey, JSON.stringify(state));
+
+      const renderTeamOptions = () => {
+        teamSelect.innerHTML = teams.map(team => `<option value="${team}">${team}</option>`).join('');
+      };
+
+      const renderNameOptions = () => {
+        const selectedTeam = teamSelect.value;
+        nameList.innerHTML = state[selectedTeam].map(member => `<option value="${member.name}"></option>`).join('');
+      };
+
+      const renderBoard = () => {
+        board.innerHTML = teams.map(team => {
+          const members = state[team];
+          return `
+            <section class="team-card">
+              <div class="team-head">
+                <h3>${team}</h3>
+                <div class="count">${members.length}명</div>
+              </div>
+              <div class="member-list">
+                ${members.length ? members.map(member => {
+                  const meta = statusMap[member.status];
+                  const detail = member.status === 'timeoff' && member.timeNote ? ` (${member.timeNote})` : '';
+                  return `
+                    <div class="member">
+                      <div>
+                        <strong>${member.name}</strong>
+                        <span>${detail ? detail.replace(/[()]/g, '') : '오늘 상태 등록됨'}</span>
+                      </div>
+                      <div class="status ${meta.className}">${meta.label}${detail}</div>
+                    </div>
+                  `;
+                }).join('') : '<div class="empty">등록된 멤버가 없습니다.</div>'}
+              </div>
+            </section>
+          `;
+        }).join('');
+      };
+
+      const updateToday = () => {
+        const now = new Date();
+        const formatted = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+        document.getElementById('todayLabel').textContent = formatted;
+      };
+
+      const upsertStatus = () => {
+        const team = teamSelect.value;
+        const name = nameInput.value.trim();
+        const status = statusSelect.value;
+        const timeNote = timeInput.value.trim();
+        if (!name) return;
+
+        const members = state[team];
+        const existing = members.find(member => member.name.toLowerCase() === name.toLowerCase());
+        if (existing) {
+          existing.name = name;
+          existing.status = status;
+          existing.timeNote = status === 'timeoff' ? timeNote : '';
+        } else {
+          members.push({ name, status, timeNote: status === 'timeoff' ? timeNote : '' });
+        }
+        persist();
+        renderNameOptions();
+        renderBoard();
+        nameInput.value = '';
+        timeInput.value = '';
+      };
+
+      statusSelect.addEventListener('change', () => {
+        timeField.style.display = statusSelect.value === 'timeoff' ? 'block' : 'none';
+      });
+
+      teamSelect.addEventListener('change', renderNameOptions);
+      document.getElementById('saveBtn').addEventListener('click', upsertStatus);
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        localStorage.removeItem(storageKey);
+        location.reload();
+      });
+
+      renderTeamOptions();
+      renderNameOptions();
+      renderBoard();
+      updateToday();
+    </script>
+  </body>
+</html>
