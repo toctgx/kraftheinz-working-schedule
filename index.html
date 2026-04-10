@@ -54,16 +54,16 @@
       .timeoff { background: #f4ecff; color: #6d28d9; }
       .alert-box { display:none; margin-bottom: 10px; padding: 12px 14px; border-radius: 16px; background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; font-size: 13px; line-height: 1.45; }
       .alert-box.show { display:block; }
-      .toast { position: fixed; left: 50%; top: 18px; transform: translateX(-50%) translateY(-10px); min-width: 220px; max-width: calc(100% - 32px); padding: 14px 16px; border-radius: 16px; background: rgba(41, 122, 67, 0.98); color: #ffffff; text-align: center; font-size: 14px; font-weight: 800; box-shadow: 0 16px 28px rgba(31, 122, 67, 0.28); opacity: 0; pointer-events: none; transition: opacity 0.18s ease, transform 0.18s ease; z-index: 99999; }
-      .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+      .toast { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.96); min-width: 240px; max-width: calc(100% - 40px); padding: 18px 18px; border-radius: 18px; background: rgba(18, 95, 46, 0.98); color: #ffffff; text-align: center; font-size: 16px; font-weight: 800; box-shadow: 0 20px 36px rgba(31, 122, 67, 0.3); opacity: 0; pointer-events: none; transition: opacity 0.18s ease, transform 0.18s ease; z-index: 99999; }
+      .toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
       .metrics-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
       .metric { padding: 12px; border-radius: 18px; background: rgba(255,255,255,0.84); border: 1px solid rgba(255,255,255,0.8); margin-bottom: 0; }
       .metric small { display: block; color: #7f5c4c; font-size: 11px; letter-spacing: 0.12em; }
       .metric strong { display: block; margin-top: 4px; font-size: 22px; letter-spacing: -0.06em; }
       .metric span { color: #7f5c4c; font-size: 13px; }
-      .admin-list { margin-top: 8px; display: none; gap: 6px; max-height: calc(100vh - 310px); overflow: auto; }
+      .admin-list { margin-top: 8px; display: none; gap: 6px; max-height: calc(100vh - 310px); overflow: auto; border-top: 1px dashed #e7cdb8; padding-top: 8px; }
       .admin-list.show { display: grid; }
-      .admin-item { padding: 10px 12px; border-radius: 14px; background: rgba(255,255,255,0.82); }
+      .admin-item { padding: 12px 12px; border-radius: 16px; background: rgba(255,255,255,0.9); border: 1px solid #efdccc; }
       .admin-item strong { display:block; font-size: 14px; margin-bottom: 5px; }
       .admin-item span { color:#7f5c4c; font-size:12px; }
       .admin-count { margin-top: 4px; font-size: 20px; font-weight: 800; letter-spacing: -0.05em; }
@@ -199,7 +199,7 @@
         toast.textContent = message;
         toast.classList.add('show');
         clearTimeout(showToast.timer);
-        showToast.timer = setTimeout(() => toast.classList.remove('show'), 2200);
+        showToast.timer = setTimeout(() => toast.classList.remove('show'), 2600);
       };
       const persist = () => localStorage.setItem(storageKey, JSON.stringify(state));
       const memberCount = () => teams.reduce((sum, team) => sum + state.members[team].length, 0);
@@ -337,6 +337,7 @@
             <div class="admin-count">${item[currentAdminTab]}</div>
           </div>
         `).join('') : `<div class="admin-item"><strong>${adminViews.find(v => v.key === currentAdminTab).label}</strong><span>현재 누적된 인원이 없습니다.</span><div class="admin-count">0</div></div>`;
+        adminList.scrollTop = 0;
       };
       const updateToday = () => {
         const now = new Date();
