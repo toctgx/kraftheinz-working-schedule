@@ -9,64 +9,73 @@
     <style>
       @import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap');
       * { box-sizing: border-box; }
-      body { margin: 0; font-family: 'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(180deg, #eef2f4 0%, #dde5e8 100%); color: #27343c; }
-      .app { max-width: 480px; margin: 0 auto; min-height: 100vh; padding: 14px 12px 102px; }
-      .hero { display: flex; justify-content: flex-end; align-items: end; gap: 10px; margin-bottom: 12px; }
-      .today-card { padding: 10px 12px; border-radius: 16px; background: rgba(255,255,255,0.76); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 18px 30px rgba(52,70,79,0.08); text-align: right; }
-      .today-card strong { display: block; font-size: 10px; letter-spacing: 0.16em; color: #2cced2; }
+      body { margin: 0; font-family: 'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(180deg, #f7e2c7 0%, #f3d4ae 48%, #efc490 100%); color: #2a180f; }
+      .app { max-width: 520px; margin: 0 auto; min-height: 100vh; padding: 16px 14px 108px; }
+      .hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: stretch; gap: 10px; margin-bottom: 12px; }
+      .hero-title { padding: 16px 18px; border-radius: 22px; background: linear-gradient(135deg, #be2b1f 0%, #d83a26 56%, #f1592a 100%); color: #fff7f1; box-shadow: 0 18px 30px rgba(123, 36, 16, 0.18); }
+      .hero-title strong { display:block; font-size: 24px; line-height: 1.02; letter-spacing: -0.06em; }
+      .hero-title span { display:block; margin-top: 6px; font-size: 12px; font-weight: 600; color: rgba(255,247,241,0.82); }
+      .today-card { padding: 12px 14px; min-width: 116px; border-radius: 20px; background: rgba(255,248,242,0.82); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 18px 30px rgba(123, 36, 16, 0.08); text-align: right; }
+      .today-card strong { display: block; font-size: 10px; letter-spacing: 0.16em; color: #c13725; }
       .today-card span { display: block; margin-top: 4px; font-size: 13px; font-weight: 700; }
-      .glass { background: rgba(255,255,255,0.68); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.76); border-radius: 24px; box-shadow: 0 18px 28px rgba(52,70,79,0.08); }
+      .glass { background: rgba(255,248,242,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.7); border-radius: 24px; box-shadow: 0 18px 28px rgba(123, 36, 16, 0.08); }
       .screen { display: none; }
       .screen.active { display: block; }
       .panel { padding: 16px; }
       .panel-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
       .panel-title h2 { margin: 0; font-size: 20px; letter-spacing: -0.05em; }
-      .panel-title span { color: #2cced2; font-weight: 800; font-size: 11px; }
+      .panel-title span { color: #c13725; font-weight: 800; font-size: 11px; }
+      .field-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
       .field { margin-bottom: 10px; }
-      .field label { display: block; font-size: 12px; color: #74838c; margin-bottom: 5px; }
-      .field input, .field select { width: 100%; min-height: 46px; border: 1px solid #d9e3e7; border-radius: 14px; padding: 0 12px; font: inherit; background: rgba(255,255,255,0.88); color: #27343c; }
-      .btn-row { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
-      button { border: none; border-radius: 14px; min-height: 46px; padding: 0 14px; font: inherit; font-weight: 800; cursor: pointer; }
-      .primary { background: #2cced2; color: white; }
-      .secondary { background: #e7f9fa; color: #22aab0; }
-      .helper { font-size: 12px; color: #74838c; margin-top: 8px; line-height: 1.4; }
+      .field label { display: block; font-size: 12px; color: #7f5c4c; margin-bottom: 5px; }
+      .field input, .field select { width: 100%; min-height: 48px; border: 1px solid #edd6c3; border-radius: 16px; padding: 0 12px; font: inherit; background: rgba(255,255,255,0.92); color: #2a180f; }
+      .btn-row { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 8px; margin-top: 12px; }
+      button { border: none; border-radius: 16px; min-height: 48px; padding: 0 14px; font: inherit; font-weight: 800; cursor: pointer; }
+      .primary { background: linear-gradient(135deg, #be2b1f 0%, #e04829 100%); color: white; }
+      .secondary { background: #fff0e5; color: #b63a24; }
+      .helper { font-size: 12px; color: #7f5c4c; margin-top: 8px; line-height: 1.4; }
       .team-tabs, .admin-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 10px; }
-      .team-tab, .admin-tab { flex: 0 0 auto; min-height: 36px; padding: 0 12px; border-radius: 999px; background: rgba(255,255,255,0.78); color: #5d6b74; border: 1px solid #e2e8ef; font-size: 12px; }
-      .team-tab.active, .admin-tab.active { background: #2cced2; color: white; border-color: transparent; }
-      .team-card { padding: 12px; border-radius: 20px; background: rgba(255,255,255,0.76); border: 1px solid rgba(255,255,255,0.76); }
+      .team-tab, .admin-tab { flex: 0 0 auto; min-height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.82); color: #7f5c4c; border: 1px solid #efdccc; font-size: 12px; }
+      .team-tab.active, .admin-tab.active { background: #c13725; color: white; border-color: transparent; }
+      .team-card { padding: 12px; border-radius: 22px; background: rgba(255,255,255,0.78); border: 1px solid rgba(255,255,255,0.78); }
       .team-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
       .team-head h3 { margin: 0; font-size: 17px; letter-spacing: 0.04em; }
-      .badge { background: #e7f9fa; color: #1faeb5; border-radius: 999px; padding: 6px 10px; font-size: 11px; font-weight: 800; }
+      .badge { background: #fff0e5; color: #b63a24; border-radius: 999px; padding: 6px 10px; font-size: 11px; font-weight: 800; }
       .member-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-      .member { display:flex; align-items:center; justify-content:space-between; gap:10px; padding: 12px 14px; border-radius: 16px; background: rgba(255,255,255,0.92); border: 1px solid #ebf1f4; min-height: 0; }
+      .member { display:flex; align-items:center; justify-content:space-between; gap:10px; padding: 12px 12px; border-radius: 18px; background: rgba(255,255,255,0.96); border: 1px solid #f2e3d7; min-height: 0; }
       .member strong { display: block; font-size: 14px; }
       .status-pill { display: inline-flex; align-items: center; justify-content: center; min-height: 28px; padding: 0 10px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; width: fit-content; }
-      .office { background: #edf7ef; color: #1f7a43; }
-      .remote { background: #e8f9fb; color: #12a7b0; }
+      .office { background: #eef7ef; color: #1f7a43; }
+      .remote { background: #fff0e5; color: #b63a24; }
       .vacation { background: #fff3e2; color: #ba6b00; }
       .half { background: #ffeaf0; color: #cf4376; }
-      .timeoff { background: #f0eaff; color: #6d28d9; }
+      .timeoff { background: #f4ecff; color: #6d28d9; }
       .alert-box { display:none; margin-bottom: 10px; padding: 12px 14px; border-radius: 16px; background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; font-size: 13px; line-height: 1.45; }
       .alert-box.show { display:block; }
-      .metric { padding: 16px; border-radius: 20px; background: rgba(255,255,255,0.82); border: 1px solid rgba(255,255,255,0.8); margin-bottom: 10px; }
-      .metric small { display: block; color: #74838c; font-size: 11px; letter-spacing: 0.12em; }
+      .metrics-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+      .metric { padding: 16px; border-radius: 20px; background: rgba(255,255,255,0.84); border: 1px solid rgba(255,255,255,0.8); margin-bottom: 0; }
+      .metric small { display: block; color: #7f5c4c; font-size: 11px; letter-spacing: 0.12em; }
       .metric strong { display: block; margin-top: 6px; font-size: 28px; letter-spacing: -0.05em; }
-      .metric span { color: #5c6b74; font-size: 13px; }
+      .metric span { color: #7f5c4c; font-size: 13px; }
       .admin-list { margin-top: 10px; display: none; gap: 8px; }
       .admin-list.show { display: grid; }
       .admin-item { padding: 12px 14px; border-radius: 16px; background: rgba(255,255,255,0.82); }
       .admin-item strong { display:block; font-size: 14px; margin-bottom: 5px; }
-      .admin-item span { color:#74838c; font-size:12px; }
+      .admin-item span { color:#7f5c4c; font-size:12px; }
       .admin-count { margin-top: 4px; font-size: 24px; font-weight: 800; letter-spacing: -0.05em; }
       .empty { color: #98a2b3; font-size: 13px; }
-      .bottom-nav { position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%); width: calc(100% - 20px); max-width: 456px; background: rgba(255,255,255,0.92); border: 1px solid rgba(255,255,255,0.9); box-shadow: 0 18px 30px rgba(52,70,79,0.12); border-radius: 22px; padding: 8px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-      .bottom-nav button { min-height: 52px; background: transparent; color: #5d6b74; border-radius: 16px; font-size: 12px; }
-      .bottom-nav button.active { background: #2cced2; color: white; }
+      .bottom-nav { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); width: calc(100% - 20px); max-width: 486px; background: rgba(59,22,16,0.94); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 18px 30px rgba(84,28,14,0.24); border-radius: 24px; padding: 8px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      .bottom-nav button { min-height: 58px; background: transparent; color: rgba(255,244,238,0.72); border-radius: 16px; font-size: 15px; line-height: 1.15; }
+      .bottom-nav button.active { background: linear-gradient(135deg, #be2b1f 0%, #e04829 100%); color: white; }
     </style>
   </head>
   <body>
     <div class="app">
       <section class="hero">
+        <div class="hero-title">
+          <strong>WORKING<br/>SCHEDULE</strong>
+          <span>Kraft Heinz inspired responsive work app</span>
+        </div>
         <div class="today-card">
           <strong>TODAY</strong>
           <span id="todayLabel"></span>
@@ -75,8 +84,10 @@
 
       <section class="screen active glass panel" id="screen-schedule">
         <div class="panel-title"><h2>WORKING SCHEDULE</h2><span>UPDATE</span></div>
-        <div class="field"><label for="teamSelect">팀</label><select id="teamSelect"></select></div>
-        <div class="field"><label for="nameSelect">이름</label><select id="nameSelect"></select></div>
+        <div class="field-grid">
+          <div class="field"><label for="teamSelect">팀</label><select id="teamSelect"></select></div>
+          <div class="field"><label for="nameSelect">이름</label><select id="nameSelect"></select></div>
+        </div>
         <div class="field"><label for="statusSelect">근무 상태</label><select id="statusSelect"><option value="office">출근</option><option value="remote">재택</option><option value="vacation">연차</option><option value="half-am">오전반차</option><option value="half-pm">오후반차</option><option value="timeoff">반반차 (시간 표시)</option></select></div>
         <div class="field" id="timeField" style="display:none;"><label for="timeInput">시간 표시</label><input id="timeInput" placeholder="예: 15:00~17:00" /></div>
         <div class="btn-row"><button class="primary" id="saveBtn">저장</button><button class="secondary" id="resetBtn">초기화</button></div>
@@ -91,16 +102,19 @@
       <section class="screen glass panel" id="screen-admin">
         <div class="panel-title"><h2>관리자 페이지</h2><span>MONTHLY</span></div>
         <div class="alert-box" id="alertBox"></div>
-        <div class="metric"><small>총 등록 인원</small><strong id="memberCount">0</strong><span>전체 팀 기준 등록된 인원 수</span></div>
+        <div class="metrics-grid">
+          <div class="metric"><small>총 등록 인원</small><strong id="memberCount">0</strong><span>전체 팀 기준 등록된 인원 수</span></div>
+          <div class="metric"><small>이번 달 기준</small><strong id="monthlySummary">0</strong><span>연차/재택/반차 누적 합계</span></div>
+        </div>
         <div class="admin-tabs" id="adminTabs"></div>
         <div class="admin-list" id="adminList"></div>
       </section>
     </div>
 
     <nav class="bottom-nav">
-      <button class="active" data-screen="screen-schedule">WORKING<br/>SCHEDULE</button>
-      <button data-screen="screen-status">TEAM<br/>STATUS</button>
-      <button data-screen="screen-admin">ADMIN</button>
+      <button class="active" data-screen="screen-schedule">🗓️<br/>Schedule</button>
+      <button data-screen="screen-status">👥<br/>Status</button>
+      <button data-screen="screen-admin">📊<br/>Admin</button>
     </nav>
 
     <script>
@@ -252,6 +266,7 @@
       const renderAdmin = () => {
         const list = monthlyList();
         document.getElementById('memberCount').textContent = memberCount();
+        document.getElementById('monthlySummary').textContent = list.reduce((sum, item) => sum + item.remote + item.vacation + item.half + item.timeoff, 0);
         renderAlerts(list);
         if (!currentAdminTab) {
           adminList.classList.remove('show');
