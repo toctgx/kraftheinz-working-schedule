@@ -54,7 +54,7 @@
       .timeoff { background: #f4ecff; color: #6d28d9; }
       .alert-box { display:none; margin-bottom: 10px; padding: 12px 14px; border-radius: 16px; background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; font-size: 13px; line-height: 1.45; }
       .alert-box.show { display:block; }
-      .toast { position: fixed; left: 50%; top: 18px; transform: translateX(-50%) translateY(-10px); min-width: 220px; max-width: calc(100% - 32px); padding: 14px 16px; border-radius: 16px; background: rgba(41, 122, 67, 0.96); color: #ffffff; text-align: center; font-size: 14px; font-weight: 800; box-shadow: 0 16px 28px rgba(31, 122, 67, 0.24); opacity: 0; pointer-events: none; transition: opacity 0.18s ease, transform 0.18s ease; z-index: 9999; }
+      .toast { position: fixed; left: 50%; top: 18px; transform: translateX(-50%) translateY(-10px); min-width: 220px; max-width: calc(100% - 32px); padding: 14px 16px; border-radius: 16px; background: rgba(41, 122, 67, 0.98); color: #ffffff; text-align: center; font-size: 14px; font-weight: 800; box-shadow: 0 16px 28px rgba(31, 122, 67, 0.28); opacity: 0; pointer-events: none; transition: opacity 0.18s ease, transform 0.18s ease; z-index: 99999; }
       .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
       .metrics-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
       .metric { padding: 12px; border-radius: 18px; background: rgba(255,255,255,0.84); border: 1px solid rgba(255,255,255,0.8); margin-bottom: 0; }
@@ -198,7 +198,7 @@
         toast.textContent = message;
         toast.classList.add('show');
         clearTimeout(showToast.timer);
-        showToast.timer = setTimeout(() => toast.classList.remove('show'), 1600);
+        showToast.timer = setTimeout(() => toast.classList.remove('show'), 2200);
       };
       const persist = () => localStorage.setItem(storageKey, JSON.stringify(state));
       const memberCount = () => teams.reduce((sum, team) => sum + state.members[team].length, 0);
@@ -351,7 +351,7 @@
         renderAdminTabs();
         renderAdmin();
         showToast('저장되었습니다.');
-        showScreen('screen-status');
+        setTimeout(() => showScreen('screen-status'), 350);
       };
 
       statusSelect.addEventListener('change', () => {
