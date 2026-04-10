@@ -109,7 +109,6 @@
         <div class="alert-box" id="alertBox"></div>
         <div class="metrics-grid">
           <div class="metric"><small>총 등록 인원</small><strong id="memberCount">0</strong><span>전체 팀 기준 등록된 인원 수</span></div>
-          <div class="metric"><small>이번 달 기준</small><strong id="monthlySummary">0</strong><span>연차/재택/반차 누적 합계</span></div>
         </div>
         <div class="admin-tabs" id="adminTabs"></div>
         <div class="admin-list" id="adminList"></div>
@@ -303,7 +302,6 @@
       const renderAdmin = () => {
         const list = monthlyList();
         document.getElementById('memberCount').textContent = memberCount();
-        document.getElementById('monthlySummary').textContent = list.reduce((sum, item) => sum + item.remote + item.vacation + item.half + item.timeoff, 0);
         renderAlerts(list);
         if (!currentAdminTab) {
           adminList.classList.remove('show');
