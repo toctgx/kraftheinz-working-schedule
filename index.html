@@ -166,7 +166,8 @@
           acc[team] = defaultMembers[team].map(name => ({ name, status: 'office', timeNote: '' }));
           return acc;
         }, {}),
-        monthlyCounts: {}
+        monthlyCounts: {},
+        dailyLogs: {}
       };
       const saved = localStorage.getItem(storageKey);
       const state = saved ? JSON.parse(saved) : initialState;
@@ -197,6 +198,15 @@
         if (!state.monthlyCounts[key]) state.monthlyCounts[key] = {};
         return state.monthlyCounts[key];
       };
+      const todayKey = () => {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      };
+      const previousDateKey = (dateKey) => {
+        const date = new Date(`${dateKey}T00:00:00`);
+        date.setDate(date.getDate() - 1);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      };
       const incrementMonthly = (name, team, status) => {
         if (status === 'office') return;
         const bucket = getMonthBucket();
@@ -207,11 +217,25 @@
         else if (status === 'half-am' || status === 'half-pm') bucket[id].half += 1;
         else if (status === 'timeoff') bucket[id].timeoff += 1;
       };
+      const logDailyStatus = (name, team, status) => {
+        const key = todayKey();
+        if (!state.dailyLogs[key]) state.dailyLogs[key] = {};
+        state.dailyLogs[key][`${team}__${name}`] = { name, team, status };
+      };
       const monthlyList = () => Object.values(getMonthBucket()).sort((a, b) => a.team.localeCompare(b.team) || a.name.localeCompare(b.name));
       const weeklyRemoteLimit = () => {
         const now = new Date();
         const weeks = Math.ceil(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() / 7);
         return weeks * 2;
+      };
+      const consecutiveRemoteMembers = () => {
+        const today = todayKey();
+        const prev = previousDateKey(today);
+        const todayLogs = state.dailyLogs[today] || {};
+        const prevLogs = state.dailyLogs[prev] || {};
+        return Object.keys(todayLogs)
+          .filter(id => todayLogs[id].status === 'remote' && prevLogs[id]?.status === 'remote')
+          .map(id => ({ name: todayLogs[id].name, team: todayLogs[id].team }));
       };
 
       const renderTeamOptions = () => {
@@ -260,13 +284,21 @@
       const renderAlerts = (list) => {
         const limit = weeklyRemoteLimit();
         const exceeded = list.filter(item => item.remote > limit);
-        if (!exceeded.length) {
+        const consecutive = consecutiveRemoteMembers();
+        const messages = [];
+        if (exceeded.length) {
+          messages.push(`월간 재택 허용 기준(${limit}회) 초과: ${exceeded.map(item => `${item.name} ${item.remote}회`).join(', ')}`);
+        }
+        if (consecutive.length) {
+          messages.push(`연속 2일 재택 인원: ${consecutive.map(item => `${item.name}(${displayTeam(item.team)})`).join(', ')}`);
+        }
+        if (!messages.length) {
           alertBox.classList.remove('show');
           alertBox.textContent = '';
           return;
         }
         alertBox.classList.add('show');
-        alertBox.textContent = `알람: 월간 재택 허용 기준(${limit}회)를 초과한 인원 - ${exceeded.map(item => `${item.name} ${item.remote}회`).join(', ')}`;
+        alertBox.textContent = `알람: ${messages.join(' / ')}`;
       };
       const renderAdmin = () => {
         const list = monthlyList();
@@ -302,6 +334,7 @@
         member.status = status;
         member.timeNote = status === 'timeoff' ? timeNote : '';
         incrementMonthly(name, team, status);
+        logDailyStatus(name, team, status);
         currentTeam = team;
         persist();
         timeInput.value = '';
