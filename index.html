@@ -208,7 +208,7 @@
         toast.textContent = message;
         toast.classList.add('show');
         clearTimeout(showToast.timer);
-        showToast.timer = setTimeout(() => toast.classList.remove('show'), 2600);
+        showToast.timer = setTimeout(() => toast.classList.remove('show'), 1200);
       };
       const persist = () => localStorage.setItem(storageKey, JSON.stringify(state));
       const memberCount = () => teams.reduce((sum, team) => sum + state.members[team].length, 0);
@@ -303,7 +303,7 @@
                       <strong>${member.name}</strong>
                       <span class="member-team">${displayTeam(member.team)}</span>
                     </div>
-                    <div class="status-pill ${meta.className}">${meta.label}${member.status === 'timeoff' && member.timeNote ? ` (${member.timeNote})` : ''}</div>
+                    <div class="status-pill ${meta.className}">${displayTeam(member.team)}</div>
                   </div>
                 `;
               }).join('') || `<div class="admin-item"><strong>${currentView.label}</strong><span>No members in this status right now.</span><div class="admin-count">0</div></div>`}
