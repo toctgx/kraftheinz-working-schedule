@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -82,7 +82,7 @@
     </style>
   </head>
   <body>
-    <div class="toast" id="toast">저장되었습니다.</div>
+    <div class="toast" id="toast">Saved successfully.</div>
     <div class="app">
       <section class="hero">
         <div class="today-card">
@@ -93,15 +93,15 @@
 
       <section class="screen active glass panel" id="screen-schedule">
         <div class="panel-title"><h2>WORKING SCHEDULE</h2><span>UPDATE</span></div>
-        <div class="status-highlight"><strong>오늘 근무 상태를 빠르게 저장하세요</strong><span>Kraft Heinz Mood</span></div>
+        <div class="status-highlight"><strong>Save today’s work status quickly</strong><span>Kraft Heinz Mood</span></div>
         <div class="field-grid">
-          <div class="field"><label for="teamSelect">팀</label><select id="teamSelect"></select></div>
-          <div class="field"><label for="nameSelect">이름</label><select id="nameSelect"></select></div>
+          <div class="field"><label for="teamSelect">Team</label><select id="teamSelect"></select></div>
+          <div class="field"><label for="nameSelect">Name</label><select id="nameSelect"></select></div>
         </div>
-        <div class="field"><label for="statusSelect">근무 상태</label><select id="statusSelect"><option value="office">출근</option><option value="remote">재택</option><option value="vacation">연차</option><option value="half-am">오전반차</option><option value="half-pm">오후반차</option><option value="timeoff">반반차 (시간 표시)</option></select></div>
-        <div class="field" id="timeField" style="display:none;"><label for="timeInput">시간 표시</label><input id="timeInput" placeholder="예: 15:00~17:00" /></div>
-        <div class="btn-row"><button class="primary" id="saveBtn">저장</button><button class="secondary" id="resetBtn">초기화</button></div>
-        <div class="helper">팀 선택 후 이름 리스트에서 선택하고 상태를 저장하면 바로 반영됩니다.</div>
+        <div class="field"><label for="statusSelect">Work Status</label><select id="statusSelect"><option value="office">Office</option><option value="remote">Remote</option><option value="vacation">Vacation</option><option value="half-am">Half Day AM</option><option value="half-pm">Half Day PM</option><option value="timeoff">Partial Time Off (Time Note)</option></select></div>
+        <div class="field" id="timeField" style="display:none;"><label for="timeInput">Time Note</label><input id="timeInput" placeholder="e.g. 15:00~17:00" /></div>
+        <div class="btn-row"><button class="primary" id="saveBtn">Save</button><button class="secondary" id="resetBtn">Reset</button></div>
+        <div class="helper">Choose a team, select a name, then save the status to update immediately.</div>
       </section>
 
       <section class="screen glass panel" id="screen-status">
@@ -110,15 +110,15 @@
       </section>
 
       <section class="screen glass panel" id="screen-admin">
-        <div class="panel-title"><h2>관리자 페이지</h2><span>MONTHLY</span></div>
+        <div class="panel-title"><h2>ADMIN PAGE</h2><span>MONTHLY</span></div>
         <div class="rule-tabs">
           <button class="rule-tab" id="houseRuleBtn" type="button">House rule</button>
-          <button class="rule-tab" data-rule="overwork" type="button">재택초과근무</button>
-          <button class="rule-tab" data-rule="consecutive" type="button">연속재택근무</button>
+          <button class="rule-tab" data-rule="overwork" type="button">Remote Over Limit</button>
+          <button class="rule-tab" data-rule="consecutive" type="button">Consecutive Remote</button>
         </div>
         <div class="rule-card" id="ruleCard"></div>
         <div class="metrics-grid">
-          <div class="metric"><small>총 등록 인원</small><strong id="memberCount">0</strong><span>전체 팀 기준 등록된 인원 수</span></div>
+          <div class="metric"><small>Total Members</small><strong id="memberCount">0</strong><span>Registered headcount across all teams</span></div>
         </div>
         <div class="admin-tabs" id="adminTabs"></div>
         <div class="admin-list" id="adminList"></div>
@@ -144,18 +144,18 @@
         'COUNTRY MANAGER': ['YK.Lee']
       };
       const statusMap = {
-        office: { label: '출근', className: 'office' },
-        remote: { label: '재택', className: 'remote' },
-        vacation: { label: '연차', className: 'vacation' },
-        'half-am': { label: '오전반차', className: 'half' },
-        'half-pm': { label: '오후반차', className: 'half' },
-        timeoff: { label: '반반차', className: 'timeoff' }
+        office: { label: 'Office', className: 'office' },
+        remote: { label: 'Remote', className: 'remote' },
+        vacation: { label: 'Vacation', className: 'vacation' },
+        'half-am': { label: 'Half Day AM', className: 'half' },
+        'half-pm': { label: 'Half Day PM', className: 'half' },
+        timeoff: { label: 'Partial Time Off', className: 'timeoff' }
       };
       const adminViews = [
-        { key: 'remote', label: '재택' },
-        { key: 'vacation', label: '연차' },
-        { key: 'half', label: '반차' },
-        { key: 'timeoff', label: '반반차' }
+        { key: 'remote', label: 'Remote' },
+        { key: 'vacation', label: 'Vacation' },
+        { key: 'half', label: 'Half Day' },
+        { key: 'timeoff', label: 'Time Off' }
       ];
       const displayTeam = (team) => team
         .replace('RT TEAM', 'RT')
@@ -283,11 +283,11 @@
         const members = state.members[currentTeam];
         teamBoard.innerHTML = `
           <section class="team-card">
-            <div class="team-head"><h3>${displayTeam(currentTeam)}</h3><div class="badge">${members.length}명</div></div>
+            <div class="team-head"><h3>${displayTeam(currentTeam)}</h3><div class="badge">${members.length} people</div></div>
             <div class="member-grid">
               ${members.map(member => {
                 const meta = statusMap[member.status];
-                const detail = member.status === 'timeoff' && member.timeNote ? member.timeNote : '오늘 상태 등록';
+                const detail = member.status === 'timeoff' && member.timeNote ? member.timeNote : 'Saved today';
                 return `
                   <div class="member">
                     <strong>${member.name}</strong>
@@ -313,21 +313,21 @@
         const consecutive = consecutiveRemoteMembers();
         if (mode === 'house') {
           ruleCard.classList.add('show');
-          ruleCard.innerHTML = `<strong>House rule</strong><ul><li>재택근무는 주 2회가 원칙입니다.</li><li>월별 누적 재택 횟수가 허용 기준을 초과하면 관리자 알람이 표시됩니다.</li><li>재택근무는 연속 2일 등록할 수 없습니다.</li></ul>`;
+          ruleCard.innerHTML = `<strong>House Rule</strong><ul><li>Remote work is limited to 2 days per week by default.</li><li>If monthly remote counts exceed the limit, it will appear in the admin review.</li><li>Remote work cannot be registered for 2 consecutive days.</li></ul>`;
           return;
         }
         if (mode === 'overwork') {
           ruleCard.classList.add('show');
           ruleCard.innerHTML = exceeded.length
-            ? `<strong>재택초과근무</strong><ul>${exceeded.map(item => `<li>${item.name} (${displayTeam(item.team)}) - ${item.remote}회</li>`).join('')}</ul>`
-            : `<strong>재택초과근무</strong><ul><li>현재 초과 인원이 없습니다.</li></ul>`;
+            ? `<strong>Remote Over Limit</strong><ul>${exceeded.map(item => `<li>${item.name} (${displayTeam(item.team)}) - ${item.remote} times</li>`).join('')}</ul>`
+            : `<strong>Remote Over Limit</strong><ul><li>There are no members over the limit right now.</li></ul>`;
           return;
         }
         if (mode === 'consecutive') {
           ruleCard.classList.add('show');
           ruleCard.innerHTML = consecutive.length
-            ? `<strong>연속재택근무</strong><ul>${consecutive.map(item => `<li>${item.name} (${displayTeam(item.team)})</li>`).join('')}</ul>`
-            : `<strong>연속재택근무</strong><ul><li>현재 연속 재택 인원이 없습니다.</li></ul>`;
+            ? `<strong>Consecutive Remote</strong><ul>${consecutive.map(item => `<li>${item.name} (${displayTeam(item.team)})</li>`).join('')}</ul>`
+            : `<strong>Consecutive Remote</strong><ul><li>There are no consecutive remote members right now.</li></ul>`;
           return;
         }
         ruleCard.classList.remove('show');
@@ -346,15 +346,15 @@
         adminList.innerHTML = filtered.length ? filtered.map(item => `
           <div class="admin-item">
             <strong>${item.name} · ${displayTeam(item.team)}</strong>
-            <span>${adminViews.find(v => v.key === currentAdminTab).label} 월간 누계</span>
+            <span>${adminViews.find(v => v.key === currentAdminTab).label} monthly total</span>
             <div class="admin-count">${item[currentAdminTab]}</div>
           </div>
-        `).join('') : `<div class="admin-item"><strong>${adminViews.find(v => v.key === currentAdminTab).label}</strong><span>현재 누적된 인원이 없습니다.</span><div class="admin-count">0</div></div>`;
+        `).join('') : `<div class="admin-item"><strong>${adminViews.find(v => v.key === currentAdminTab).label}</strong><span>There are no accumulated records right now.</span><div class="admin-count">0</div></div>`;
         adminList.scrollTop = 0;
       };
       const updateToday = () => {
         const now = new Date();
-        document.getElementById('todayLabel').textContent = now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+        document.getElementById('todayLabel').textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
       };
       const saveStatus = () => {
         const team = teamSelect.value;
@@ -375,7 +375,7 @@
         renderTeamBoard();
         renderAdminTabs();
         renderAdmin();
-        showToast('저장되었습니다.');
+        showToast('Saved successfully.');
         setTimeout(() => showScreen('screen-status'), 350);
       };
 
