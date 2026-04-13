@@ -179,6 +179,7 @@
         }, {}),
         monthlyCounts: {},
         dailyLogs: {},
+        importedMonthlyCounts: {},
         lastResetDate: null
       });
       const initialState = createInitialState();
@@ -241,6 +242,7 @@
         });
         state.monthlyCounts ||= {};
         state.dailyLogs ||= {};
+        state.importedMonthlyCounts ||= {};
       };
       const recalculateMonthlyCounts = () => {
         state.monthlyCounts = {};
@@ -289,7 +291,11 @@
         }
         persist();
       };
-      const monthlyList = () => Object.values(getMonthBucket()).sort((a, b) => a.team.localeCompare(b.team) || a.name.localeCompare(b.name));
+      const monthlyList = () => {
+        const imported = state.importedMonthlyCounts?.[monthKey()];
+        const source = imported && Object.keys(imported).length ? imported : getMonthBucket();
+        return Object.values(source).sort((a, b) => a.team.localeCompare(b.team) || a.name.localeCompare(b.name));
+      };
       const weeklyRemoteLimit = () => {
         const now = new Date();
         const weeks = Math.ceil(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() / 7);
@@ -447,6 +453,29 @@
         }
         return null;
       };
+      const rebuildImportedMonthlyCounts = () => {
+        const bucketKey = monthKey();
+        state.importedMonthlyCounts[bucketKey] = {};
+        importedAprilSheet.forEach((row, index) => {
+          if (index < 6) return;
+          const rawName = row?.[2];
+          if (!rawName || rawName === 'Name' || rawName === 'TTL by Day') return;
+          if (!teamAliases[rawName]) return;
+          const team = teamAliases[rawName];
+          const name = normalizeImportedName(rawName);
+          const id = `${team}__${name}`;
+          if (!state.importedMonthlyCounts[bucketKey][id]) state.importedMonthlyCounts[bucketKey][id] = { name, team, remote: 0, vacation: 0, halfAm: 0, halfPm: 0, timeoff: 0 };
+          for (let col = 5; col < row.length; col += 1) {
+            const parsed = parseImportedStatus(row[col]);
+            if (!parsed) continue;
+            if (parsed.status === 'remote') state.importedMonthlyCounts[bucketKey][id].remote += 1;
+            else if (parsed.status === 'vacation') state.importedMonthlyCounts[bucketKey][id].vacation += 1;
+            else if (parsed.status === 'half-am') state.importedMonthlyCounts[bucketKey][id].halfAm += 1;
+            else if (parsed.status === 'half-pm') state.importedMonthlyCounts[bucketKey][id].halfPm += 1;
+            else if (parsed.status === 'timeoff') state.importedMonthlyCounts[bucketKey][id].timeoff += 1;
+          }
+        });
+      };
       const applyImportedSheetToToday = () => {
         if (!importedAprilSheet) {
           showToast('Import the April sheet first.');
@@ -482,6 +511,7 @@
           appliedCount += 1;
         });
         state.lastResetDate = today;
+        rebuildImportedMonthlyCounts();
         recalculateMonthlyCounts();
         persist();
         renderTeamTabs();
