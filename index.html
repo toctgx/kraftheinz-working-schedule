@@ -66,10 +66,11 @@
       .metric span { color: #7a7a7a; font-size: 13px; }
       .admin-list { margin-top: 8px; display: none; gap: 6px; max-height: calc(100vh - 310px); overflow: auto; border-top: 1px dashed #e7cdb8; padding-top: 8px; }
       .admin-list.show { display: grid; }
-      .admin-item { padding: 12px 12px; border-radius: 16px; background: #ffffff; border: 1px solid #ececec; }
-      .admin-item strong { display:block; font-size: 14px; margin-bottom: 5px; }
-      .admin-item span { color:#7a7a7a; font-size:12px; }
-      .admin-count { margin-top: 4px; font-size: 20px; font-weight: 800; letter-spacing: -0.05em; }
+      .admin-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding: 10px 12px; border-radius: 14px; background: #ffffff; border: 1px solid #ececec; }
+      .admin-item-main { min-width:0; }
+      .admin-item strong { display:block; font-size: 13px; margin-bottom: 2px; }
+      .admin-item span { color:#7a7a7a; font-size:11px; }
+      .admin-count { flex:0 0 auto; min-width: 34px; text-align:center; padding: 6px 10px; border-radius: 999px; background:#fff1f2; color:#d92d32; font-size: 16px; font-weight: 800; letter-spacing: -0.03em; }
       .empty { color: #98a2b3; font-size: 13px; }
       .bottom-nav { position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%); width: calc(100% - 20px); max-width: 520px; background: #ffffff; border: 1px solid #ececec; box-shadow: 0 10px 22px rgba(0,0,0,0.06); border-radius: 22px; padding: 6px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
       .bottom-nav button { min-height: 52px; background: transparent; color: #7a7a7a; border-radius: 16px; font-size: 13px; line-height: 1.15; }
@@ -403,11 +404,13 @@
         adminList.classList.add('show');
         adminList.innerHTML = filtered.length ? filtered.map(item => `
           <div class="admin-item">
-            <strong>${item.name} · ${displayTeam(item.team)}</strong>
-            <span>${adminViews.find(v => v.key === currentAdminTab).label} monthly total</span>
+            <div class="admin-item-main">
+              <strong>${item.name} · ${displayTeam(item.team)}</strong>
+              <span>${adminViews.find(v => v.key === currentAdminTab).label} monthly total</span>
+            </div>
             <div class="admin-count">${item[currentAdminTab]}</div>
           </div>
-        `).join('') : `<div class="admin-item"><strong>${adminViews.find(v => v.key === currentAdminTab).label}</strong><span>There are no accumulated records right now.</span><div class="admin-count">0</div></div>`;
+        `).join('') : `<div class="admin-item"><div class="admin-item-main"><strong>${adminViews.find(v => v.key === currentAdminTab).label}</strong><span>There are no accumulated records right now.</span></div><div class="admin-count">0</div></div>`;
         adminList.scrollTop = 0;
       };
       const parseImportedStatus = (raw) => {
