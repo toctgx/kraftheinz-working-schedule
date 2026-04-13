@@ -64,9 +64,9 @@
       .metric small { display: block; color: #7a7a7a; font-size: 11px; letter-spacing: 0.12em; }
       .metric strong { display: block; margin-top: 4px; font-size: 22px; letter-spacing: -0.06em; }
       .metric span { color: #7a7a7a; font-size: 13px; }
-      .admin-list { margin-top: 8px; display: none; gap: 6px; grid-template-columns: repeat(3, minmax(0, 1fr)); max-height: calc(100vh - 260px); overflow-y: auto; overflow-x: hidden; border-top: 1px dashed #e7cdb8; padding: 8px 2px 34px; align-content: start; }
+      .admin-list { margin-top: 8px; display: none; gap: 6px; grid-template-columns: repeat(3, minmax(0, 1fr)); height: calc(100vh - 260px); overflow-y: auto; overflow-x: hidden; border-top: 1px dashed #e7cdb8; padding: 8px 2px 44px; align-content: start; scrollbar-gutter: stable both-edges; }
       .admin-list.show { display: grid; }
-      .admin-item { display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:8px; min-height: 82px; padding: 10px 10px; border-radius: 14px; background: #ffffff; border: 1px solid #ececec; }
+      .admin-item { display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:8px; min-height: 78px; padding: 10px 10px; border-radius: 14px; background: #ffffff; border: 1px solid #ececec; }
       .admin-item-main { min-width:0; width: 100%; }
       .admin-item strong { display:block; font-size: 12px; margin-bottom: 0; line-height: 1.25; word-break: keep-all; }
       .admin-item span { display:none; }
@@ -80,7 +80,7 @@
         .hero { grid-template-columns: 1fr; }
         .app { padding-bottom: 90px; }
         .member-grid { max-height: calc(100vh - 320px); }
-        .admin-list { grid-template-columns: repeat(3, minmax(0, 1fr)); max-height: calc(100vh - 280px); }
+        .admin-list { grid-template-columns: repeat(3, minmax(0, 1fr)); height: calc(100vh - 280px); }
       }
     </style>
   </head>
@@ -405,12 +405,11 @@
         adminList.innerHTML = filtered.length ? filtered.map(item => `
           <div class="admin-item">
             <div class="admin-item-main">
-              <strong>${item.name} · ${displayTeam(item.team)}</strong>
-              <span>${adminViews.find(v => v.key === currentAdminTab).label} monthly total</span>
+              <strong>${item.name}</strong>
             </div>
             <div class="admin-count">${item[currentAdminTab]}</div>
           </div>
-        `).join('') : `<div class="admin-item"><div class="admin-item-main"><strong>${adminViews.find(v => v.key === currentAdminTab).label}</strong><span>There are no accumulated records right now.</span></div><div class="admin-count">0</div></div>`;
+        `).join('') : `<div class="admin-item"><div class="admin-item-main"><strong>0</strong></div><div class="admin-count">0</div></div>`;
         adminList.scrollTop = 0;
       };
       const parseImportedStatus = (raw) => {
