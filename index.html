@@ -412,12 +412,7 @@
         if (value === 'D') return { status: 'vacation', timeNote: '', eventType: 'leave' };
         if (/^D\((오전|AM)\)$/i.test(value)) return { status: 'half-am', timeNote: '', eventType: 'leave_am' };
         if (/^D\((오후|PM)\)$/i.test(value) || /^D오후\)?$/i.test(value)) return { status: 'half-pm', timeNote: '', eventType: 'leave_pm' };
-        if (/^D\(([^)]+)\)$/.test(value)) {
-          const note = value.match(/^D\(([^)]+)\)$/)?.[1] || '';
-          if (/\d/.test(note)) return { status: 'timeoff', timeNote: note, eventType: 'partial_leave' };
-          return { status: 'vacation', timeNote: note, eventType: 'leave' };
-        }
-        if (/^D\//.test(value)) return { status: 'vacation', timeNote: value.replace(/^D\//, ''), eventType: 'leave' };
+        if (/^D[(/]/.test(value) || /^D\(/.test(value)) return { status: 'vacation', timeNote: '', eventType: 'leave' };
         return { status: 'office', timeNote: value, eventType: 'office_event' };
       };
       const teamAliases = {
