@@ -64,12 +64,12 @@
       .metric small { display: block; color: #7a7a7a; font-size: 11px; letter-spacing: 0.12em; }
       .metric strong { display: block; margin-top: 4px; font-size: 22px; letter-spacing: -0.06em; }
       .metric span { color: #7a7a7a; font-size: 13px; }
-      .admin-list { margin-top: 8px; display: none; gap: 6px; grid-template-columns: repeat(3, minmax(0, 1fr)); max-height: calc(100vh - 280px); overflow: auto; border-top: 1px dashed #e7cdb8; padding: 8px 2px 22px; align-content: start; }
+      .admin-list { margin-top: 8px; display: none; gap: 6px; grid-template-columns: repeat(3, minmax(0, 1fr)); max-height: calc(100vh - 260px); overflow-y: auto; overflow-x: hidden; border-top: 1px dashed #e7cdb8; padding: 8px 2px 34px; align-content: start; }
       .admin-list.show { display: grid; }
-      .admin-item { display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:8px; min-height: 92px; padding: 10px 10px; border-radius: 14px; background: #ffffff; border: 1px solid #ececec; }
-      .admin-item-main { min-width:0; }
-      .admin-item strong { display:block; font-size: 12px; margin-bottom: 2px; line-height: 1.25; word-break: keep-all; }
-      .admin-item span { color:#7a7a7a; font-size:10px; }
+      .admin-item { display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:8px; min-height: 82px; padding: 10px 10px; border-radius: 14px; background: #ffffff; border: 1px solid #ececec; }
+      .admin-item-main { min-width:0; width: 100%; }
+      .admin-item strong { display:block; font-size: 12px; margin-bottom: 0; line-height: 1.25; word-break: keep-all; }
+      .admin-item span { display:none; }
       .admin-count { align-self:flex-end; flex:0 0 auto; min-width: 30px; text-align:center; padding: 5px 9px; border-radius: 999px; background:#fff1f2; color:#d92d32; font-size: 15px; font-weight: 800; letter-spacing: -0.03em; }
       .empty { color: #98a2b3; font-size: 13px; }
       .bottom-nav { position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%); width: calc(100% - 20px); max-width: 520px; background: #ffffff; border: 1px solid #ececec; box-shadow: 0 10px 22px rgba(0,0,0,0.06); border-radius: 22px; padding: 6px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -80,7 +80,7 @@
         .hero { grid-template-columns: 1fr; }
         .app { padding-bottom: 90px; }
         .member-grid { max-height: calc(100vh - 320px); }
-        .admin-list { grid-template-columns: repeat(3, minmax(0, 1fr)); max-height: calc(100vh - 300px); }
+        .admin-list { grid-template-columns: repeat(3, minmax(0, 1fr)); max-height: calc(100vh - 280px); }
       }
     </style>
   </head>
@@ -361,7 +361,7 @@
       const renderAdminTabs = () => {
         adminTabs.innerHTML = adminViews.map(tab => `<button class="admin-tab ${tab.key === currentAdminTab ? 'active' : ''}" data-admin="${tab.key}">${tab.label}</button>`).join('');
         adminTabs.querySelectorAll('[data-admin]').forEach(btn => btn.addEventListener('click', () => {
-          currentAdminTab = btn.dataset.admin;
+          currentAdminTab = currentAdminTab === btn.dataset.admin ? null : btn.dataset.admin;
           renderAdminTabs();
           renderAdmin();
         }));
