@@ -103,6 +103,7 @@
         <div class="field"><label for="statusSelect">Work Status</label><select id="statusSelect"><option value="office">Office</option><option value="remote">Home</option><option value="vacation">Leave</option><option value="half-am">Half Day AM</option><option value="half-pm">Half Day PM</option><option value="timeoff">Partial Time Off (Time Note)</option></select></div>
         <div class="field" id="timeField" style="display:none;"><label for="timeInput">Time Note</label><input id="timeInput" placeholder="e.g. 15:00~17:00" /></div>
         <div class="btn-row"><button class="primary" id="saveBtn">Save</button><button class="secondary" id="resetBtn">Reset</button></div>
+        <div class="btn-row"><button class="secondary" id="importAprBtn">Import April Sheet</button><button class="secondary" id="applyAprTodayBtn">Apply to Today</button></div>
         <div class="helper">Choose a team, select a name, then save the status to update immediately.</div>
       </section>
 
@@ -133,6 +134,7 @@
       <button data-screen="screen-admin">📊<br/>Admin</button>
     </nav>
 
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
       const teams = ['RT TEAM','AFH TEAM','MKT TEAM','FINANCE TEAM','S&OP TEAM','LOGISTICS TEAM','HR TEAM','COUNTRY MANAGER'];
       const defaultMembers = {
@@ -198,6 +200,7 @@
       const adminList = document.getElementById('adminList');
       const toast = document.getElementById('toast');
       const ruleCard = document.getElementById('ruleCard');
+      let importedAprilSheet = null;
 
       const showScreen = (id) => {
         screens.forEach(screen => screen.classList.toggle('active', screen.id === id));
@@ -401,6 +404,73 @@
         `).join('') : `<div class="admin-item"><strong>${adminViews.find(v => v.key === currentAdminTab).label}</strong><span>There are no accumulated records right now.</span><div class="admin-count">0</div></div>`;
         adminList.scrollTop = 0;
       };
+      const parseImportedStatus = (raw) => {
+        const value = String(raw || '').trim();
+        if (!value) return { status: 'office', timeNote: '' };
+        if (value === 'O') return { status: 'office', timeNote: '' };
+        if (value === 'H') return { status: 'remote', timeNote: '' };
+        if (value === 'D') return { status: 'vacation', timeNote: '' };
+        if (/^D\((오전|AM)\)$/i.test(value)) return { status: 'half-am', timeNote: '' };
+        if (/^D\((오후|PM)\)$/i.test(value)) return { status: 'half-pm', timeNote: '' };
+        if (/^D\(([^)]+)\)$/.test(value)) {
+          const note = value.match(/^D\(([^)]+)\)$/)?.[1] || '';
+          if (/\d/.test(note)) return { status: 'timeoff', timeNote: note };
+          return { status: 'vacation', timeNote: note };
+        }
+        if (/^D\//.test(value)) return { status: 'vacation', timeNote: value.replace(/^D\//, '') };
+        return { status: 'timeoff', timeNote: value };
+      };
+      const importAprilSheet = async () => {
+        const response = await fetch('./assets/working_schedule_apr.xlsx');
+        const buffer = await response.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        importedAprilSheet = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false });
+        showToast('April sheet imported.');
+      };
+      const applyImportedSheetToToday = () => {
+        if (!importedAprilSheet) {
+          showToast('Import the April sheet first.');
+          return;
+        }
+        const now = new Date();
+        const todayDate = now.getDate();
+        let dayColumn = -1;
+        const dateRow = importedAprilSheet.find(row => row && row.includes && row.includes(todayDate));
+        if (dateRow) dayColumn = dateRow.findIndex(cell => Number(cell) === todayDate);
+        if (dayColumn === -1) {
+          showToast('Today was not found in the April sheet.');
+          return;
+        }
+        const teamAliases = {
+          Alex: 'RT TEAM', Thomas: 'RT TEAM', Ryan: 'RT TEAM', Hugh: 'RT TEAM', Luca: 'RT TEAM', Adela: 'RT TEAM', Lilly: 'RT TEAM',
+          Austin: 'AFH TEAM', Antonio: 'AFH TEAM', 'John.P': 'AFH TEAM', Dennis: 'AFH TEAM', Tom: 'AFH TEAM',
+          Jen: 'MKT TEAM', Jimin: 'MKT TEAM', Leo: 'MKT TEAM', Heewon: 'MKT TEAM', Olivia: 'MKT TEAM',
+          Steve: 'FINANCE TEAM', Rachel: 'FINANCE TEAM', Joanne: 'HR TEAM', Khan: 'FINANCE TEAM', Claire: 'HR TEAM',
+          Grace: 'S&OP TEAM', Jessica: 'S&OP TEAM', Sophie: 'S&OP TEAM',
+          Edward: 'LOGISTICS TEAM', Amy: 'LOGISTICS TEAM', Jane: 'LOGISTICS TEAM', Nari: 'LOGISTICS TEAM'
+        };
+        importedAprilSheet.forEach(row => {
+          const name = row?.[2];
+          if (!name || !teamAliases[name]) return;
+          const raw = row[dayColumn];
+          if (!raw) return;
+          const parsed = parseImportedStatus(raw);
+          const team = teamAliases[name];
+          const member = state.members[team]?.find(item => item.name === name || (name === 'John.P' && item.name === 'John') || (name === 'Khan' && item.name === 'Kahn'));
+          if (!member) return;
+          member.status = parsed.status;
+          member.timeNote = parsed.timeNote || '';
+          logDailyStatus(member.name, team, parsed);
+        });
+        recalculateMonthlyCounts();
+        persist();
+        renderTeamTabs();
+        renderTeamBoard();
+        renderAdminTabs();
+        renderAdmin();
+        showToast('April sheet applied to today.');
+      };
       const updateToday = () => {
         const now = new Date();
         document.getElementById('todayLabel').textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
@@ -436,6 +506,8 @@
         localStorage.removeItem(storageKey);
         location.reload();
       });
+      document.getElementById('importAprBtn').addEventListener('click', importAprilSheet);
+      document.getElementById('applyAprTodayBtn').addEventListener('click', applyImportedSheetToToday);
       navButtons.forEach(btn => btn.addEventListener('click', () => showScreen(btn.dataset.screen)));
       document.getElementById('houseRuleBtn').addEventListener('click', () => renderRuleCard('house', monthlyList()));
       document.querySelectorAll('[data-rule]').forEach(btn => btn.addEventListener('click', () => renderRuleCard(btn.dataset.rule, monthlyList())));
