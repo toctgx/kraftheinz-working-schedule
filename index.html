@@ -419,7 +419,7 @@
         Alex: 'RT TEAM', Thomas: 'RT TEAM', Ryan: 'RT TEAM', Hugh: 'RT TEAM', Luca: 'RT TEAM', Adela: 'RT TEAM', Lilly: 'RT TEAM',
         Austin: 'AFH TEAM', Antonio: 'AFH TEAM', 'John.P': 'AFH TEAM', Dennis: 'AFH TEAM', Tom: 'AFH TEAM',
         Jen: 'MKT TEAM', Jimin: 'MKT TEAM', Leo: 'MKT TEAM', Heewon: 'MKT TEAM', Olivia: 'MKT TEAM',
-        Steve: 'FINANCE TEAM', Rachel: 'FINANCE TEAM', Joanne: 'HR TEAM', Khan: 'FINANCE TEAM', Claire: 'HR TEAM',
+        Steve: 'FINANCE TEAM', Rachel: 'FINANCE TEAM', Joanne: 'FINANCE TEAM', Khan: 'FINANCE TEAM', Claire: 'HR TEAM',
         Grace: 'S&OP TEAM', Jessica: 'S&OP TEAM', Sophie: 'S&OP TEAM',
         Edward: 'LOGISTICS TEAM', Amy: 'LOGISTICS TEAM', Jane: 'LOGISTICS TEAM', Nari: 'LOGISTICS TEAM'
       };
@@ -488,7 +488,8 @@
         renderTeamBoard();
         renderAdminTabs();
         renderAdmin();
-        showToast(`Applied ${appliedCount} entries for today.`);
+        const remoteCount = teams.flatMap(team => state.members[team]).filter(member => member.status === 'remote').length;
+        showToast(`Applied ${appliedCount} entries, Home ${remoteCount}.`);
       };
       const updateToday = () => {
         const now = new Date();
