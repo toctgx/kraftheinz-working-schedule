@@ -19,7 +19,9 @@
       .screen { display: none; }
       .screen.active { display: block; }
       #screen-schedule.active { padding: 14px; }
-      #screen-status.active { padding: 14px 14px 0; }
+      #screen-status.active { padding: 0; display: flex; flex-direction: column; height: calc(100vh - 84px); }
+      .status-tabs-fixed { flex: 0 0 auto; padding: 14px 14px 0; }
+      .status-scroll { flex: 1 1 auto; overflow-y: auto; padding: 0 14px 84px; }
       #screen-admin.active { padding: 14px 14px 0; }
       .hero-metrics { display:none; }
       .panel-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -114,8 +116,10 @@
       </section>
 
       <section class="screen glass" id="screen-status">
-        <div class="team-tabs" id="teamTabs"></div>
-        <div id="teamBoard"></div>
+        <div class="status-tabs-fixed">
+          <div class="team-tabs" id="teamTabs"></div>
+        </div>
+        <div class="status-scroll" id="teamBoard"></div>
       </section>
 
       <section class="screen glass" id="screen-admin">
