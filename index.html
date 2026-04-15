@@ -107,8 +107,8 @@
           <div class="field"><label for="teamSelect">팀</label><select id="teamSelect"></select></div>
           <div class="field"><label for="nameSelect">이름</label><select id="nameSelect"></select></div>
         </div>
-        <div class="field"><label for="statusSelect">근무 형태</label><select id="statusSelect"><option value="office">오피스</option><option value="remote">재택근무</option><option value="vacation">휴가</option><option value="half-am">오전 반차</option><option value="half-pm">오후 반차</option><option value="timeoff">시간 외 (메모)</option></select></div>
-        <div class="field" id="timeField" style="display:none;"><label for="timeInput">시간 메모</label><input id="timeInput" placeholder="예: 15:00~17:00" /></div>
+        <div class="field"><label for="statusSelect">근무 형태</label><select id="statusSelect"><option value="office">오피스</option><option value="remote">재택근무</option><option value="vacation">휴가</option><option value="half-am">오전 반차</option><option value="half-pm">오후 반차</option><option value="timeoff">반반차</option></select></div>
+        <div class="field" id="timeField" style="display:none;"><label for="timeInput">시간 메모 (예: 15:00~17:00)</label><input id="timeInput" placeholder="15:00~17:00" /></div>
         <div class="btn-row"><button class="primary" id="saveBtn" style="grid-column: 1 / -1;">저장</button></div>
         <div class="helper-highlight">매월 1일 working schedule excel 파일을 기준으로 자동으로 근무 상태가 업데이트 됩니다.<br>근무 상태 변경이 있을 경우 위 항목에서 직접 수정하여 저장해주세요.</div>
       </section>
@@ -167,14 +167,14 @@
         vacation: { label: '휴가', className: 'vacation' },
         'half-am': { label: '오전 반차', className: 'half' },
         'half-pm': { label: '오후 반차', className: 'half' },
-        timeoff: { label: '시간 외', className: 'timeoff' }
+        timeoff: { label: '반반차', className: 'timeoff' }
       };
       const adminViews = [
         { key: 'remote', label: '재택근무' },
         { key: 'vacation', label: '휴가' },
         { key: 'halfAm', label: '오전 반차' },
         { key: 'halfPm', label: '오후 반차' },
-        { key: 'timeoff', label: '시간 외' }
+        { key: 'timeoff', label: '반반차' }
       ];
       const displayTeam = (team) => team
         .replace('RT TEAM', 'RT')
@@ -338,7 +338,7 @@
         { key: 'vacation', label: '휴가', match: member => member.status === 'vacation' },
         { key: 'half-am', label: '오전 반차', match: member => member.status === 'half-am' },
         { key: 'half-pm', label: '오후 반차', match: member => member.status === 'half-pm' },
-        { key: 'timeoff', label: '시간 외', match: member => member.status === 'timeoff' }
+        { key: 'timeoff', label: '반반차', match: member => member.status === 'timeoff' }
       ];
       const renderTeamTabs = () => {
         teamTabs.innerHTML = statusViews.map(view => `<button class="team-tab ${view.key === currentTeam ? 'active' : ''}" data-team="${view.key}">${view.label}</button>`).join('');
@@ -367,7 +367,7 @@
                       <strong>${member.name}</strong>
                       <span class="member-team">${displayTeam(member.team)}</span>
                     </div>
-                    <div class="status-pill ${meta.className}">${member.timeNote ? member.timeNote : displayTeam(member.team)}</div>
+                    <div class="status-pill ${meta.className}">${member.status === 'timeoff' && member.timeNote ? '반반차 ' + member.timeNote : member.timeNote ? member.timeNote : displayTeam(member.team)}</div>
                   </div>
                 `;
               }).join('') || `<p style="color:#aaa;font-size:13px;padding:12px 0">해당 인원이 없습니다.</p>`}
