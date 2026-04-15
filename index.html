@@ -411,10 +411,7 @@
           <div class="member-list">
             ${members.map(member => `
               <div class="member-item">
-                <div>
-                  <div class="member-name">${member.name}</div>
-                  <div class="member-team-tag">${displayTeam(member.team)}</div>
-                </div>
+                <div class="member-name">${member.name}</div>
                 <div class="status-chip ${chipClass[member.status] || 'chip-office'}">${chipLabel(member)}</div>
               </div>
             `).join('')}
