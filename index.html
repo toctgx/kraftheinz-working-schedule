@@ -95,9 +95,9 @@
       .nav-btn svg { transition: none; }
 
       /* ── 업데이트 배너 ── */
-      .update-banner { display: none; background: #1a1a1a; color: #fff; padding: 10px 16px; font-size: 13px; font-weight: 600; display: none; justify-content: space-between; align-items: center; }
+      .update-banner { display: none; background: #1a5a9a; color: #fff; padding: 12px 16px; font-size: 13px; font-weight: 700; justify-content: space-between; align-items: center; gap: 12px; }
       .update-banner.show { display: flex; }
-      .update-banner button { background: #d92d32; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; min-height: unset; }
+      .update-banner button { background: #fff; color: #1a5a9a; border: none; border-radius: 8px; padding: 6px 16px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; min-height: unset; white-space: nowrap; }
 
       /* ── Pull to Refresh ── */
       .ptr-indicator { text-align: center; padding: 0; font-size: 12px; color: #bbb; max-height: 0; overflow: hidden; transition: max-height 0.2s, padding 0.2s; }
@@ -136,8 +136,8 @@
   <body>
     <div class="toast" id="toast">저장되었습니다.</div>
     <div class="update-banner" id="updateBanner">
-      <span>새로운 버전이 있습니다.</span>
-      <button onclick="location.reload()">업데이트</button>
+      <span>🔄 새로운 버전이 있습니다.</span>
+      <button onclick="location.reload()">지금 업데이트</button>
     </div>
     <div class="app">
 
@@ -907,44 +907,16 @@
         navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
       }
 
-      // Pull to Refresh
-      (() => {
-        let startY = 0;
-        let triggered = false;
-
-        // 인디케이터 요소 생성
-        const indicator = document.createElement('div');
-        indicator.style.cssText = 'position:fixed;top:0;left:0;right:0;text-align:center;padding:0;font-size:12px;color:#999;background:#f4f4f6;max-height:0;overflow:hidden;transition:max-height 0.2s,padding 0.2s;z-index:9999;';
-        indicator.textContent = '↻ 누르면 새로고침';
-        document.body.appendChild(indicator);
-
-        document.addEventListener('touchstart', e => {
-          startY = e.touches[0].clientY;
-          triggered = false;
-        }, { passive: true });
-
-        document.addEventListener('touchmove', e => {
-          const dy = e.touches[0].clientY - startY;
-          const activeScreen = document.querySelector('.screen.active');
-          const scrollEl = activeScreen ? activeScreen.querySelector('.scroll-area') : null;
-          const atTop = !scrollEl || scrollEl.scrollTop <= 0;
-
-          if (dy > 0 && atTop) {
-            indicator.style.maxHeight = Math.min(dy * 0.5, 44) + 'px';
-            indicator.style.padding = Math.min(dy * 0.3, 12) + 'px 0';
-            if (dy > 80) triggered = true;
-          }
-        }, { passive: true });
-
-        document.addEventListener('touchend', () => {
-          indicator.style.maxHeight = '0';
-          indicator.style.padding = '0';
-          if (triggered) {
-            triggered = false;
-            setTimeout(() => location.reload(), 150);
-          }
-        });
-      })();
+      // 앱 실행 시 자동 업데이트 체크 (5분마다)
+      const checkUpdate = () => {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.getRegistration().then(reg => {
+            if (reg) reg.update();
+          });
+        }
+      };
+      checkUpdate();
+      setInterval(checkUpdate, 5 * 60 * 1000);
     </script>
   </body>
 </html>
