@@ -35,6 +35,8 @@
       .primary { background: linear-gradient(180deg, #de2f36 0%, #cf242d 100%); color: white; }
       .secondary { background: #f7f7f7; color: #b4232a; }
       .helper { font-size: 11px; color: #7a7a7a; margin-top: 6px; line-height: 1.35; }
+      .helper-highlight { margin-top: 10px; padding: 12px 14px; border-radius: 14px; background: linear-gradient(135deg, #fff5f5 0%, #fff0f0 100%); border: 1px solid #ffd6d8; font-size: 13px; color: #8f1d22; line-height: 1.6; font-weight: 600; }      
+      .helper-highlight::before { content: '📌 '; }
       .team-tabs, .admin-tabs, .rule-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; margin-bottom: 8px; }
       .team-tab, .admin-tab, .rule-tab { flex: 0 0 auto; min-height: 36px; padding: 0 14px; border-radius: 999px; background: #ffffff; color: #686868; border: 1px solid #e7e7e7; font-size: 11px; touch-action: manipulation; }
       .team-tab.active, .admin-tab.active, .rule-tab.active { background: #d92d32; color: white; border-color: transparent; box-shadow: 0 8px 16px rgba(217,45,50,0.18); }
@@ -104,7 +106,7 @@
         <div class="field"><label for="statusSelect">Work Status</label><select id="statusSelect"><option value="office">Office</option><option value="remote">Home</option><option value="vacation">Leave</option><option value="half-am">Half Day AM</option><option value="half-pm">Half Day PM</option><option value="timeoff">Partial Time Off (Time Note)</option></select></div>
         <div class="field" id="timeField" style="display:none;"><label for="timeInput">Time Note</label><input id="timeInput" placeholder="e.g. 15:00~17:00" /></div>
         <div class="btn-row"><button class="primary" id="saveBtn">Save</button><button class="secondary" id="resetBtn">Reset</button></div>
-        <div class="helper">매월 1일 working schedule excel 파일을 기준으로 자동으로 근무 상태가 업데이트 됩니다. 근무 상태 변경이 있을 경우 위 항목에서 직접 수정하여 저장해주세요.</div>
+        <div class="helper-highlight">매월 1일 working schedule excel 파일을 기준으로 자동으로 근무 상태가 업데이트 됩니다.<br>근무 상태 변경이 있을 경우 위 항목에서 직접 수정하여 저장해주세요.</div>
       </section>
 
       <section class="screen glass panel" id="screen-status">
