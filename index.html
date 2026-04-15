@@ -17,7 +17,7 @@
       .today-card span { display: block; margin-top: 4px; font-size: 12px; font-weight: 700; }
       .glass { background: #ffffff; border: 1px solid #ececec; border-radius: 22px; box-shadow: 0 14px 24px rgba(0, 0, 0, 0.05); }
       .screen { display: none; }
-      .screen.active { display: block; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+      .screen.active { display: block; flex: 1 1 auto; min-height: 0; overflow-y: auto; }
       .panel { padding: 14px; position: relative; }
       .hero-metrics { display:none; }
       .panel-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -64,7 +64,7 @@
       .metric small { display: block; color: #7a7a7a; font-size: 11px; letter-spacing: 0.12em; }
       .metric strong { display: block; margin-top: 4px; font-size: 22px; letter-spacing: -0.06em; }
       .metric span { color: #7a7a7a; font-size: 13px; }
-      .admin-list { margin-top: 8px; display: none; gap: 6px; grid-template-columns: repeat(3, minmax(0, 1fr)); height: calc(100vh - 260px); overflow-y: auto; overflow-x: hidden; border-top: 1px dashed #e7cdb8; padding: 8px 2px 44px; align-content: start; scrollbar-gutter: stable both-edges; }
+      .admin-list { margin-top: 8px; display: none; gap: 6px; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow-y: auto; overflow-x: hidden; border-top: 1px dashed #e7cdb8; padding: 8px 2px 44px; align-content: start; scrollbar-gutter: stable both-edges; }
       .admin-list.show { display: grid; }
       .admin-item { display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:8px; min-height: 78px; padding: 10px 10px; border-radius: 14px; background: #ffffff; border: 1px solid #ececec; }
       .admin-item-main { min-width:0; width: 100%; }
@@ -80,7 +80,7 @@
         .hero { grid-template-columns: 1fr; }
         .app { padding-bottom: 90px; }
         .member-grid { max-height: calc(100vh - 320px); }
-        .admin-list { grid-template-columns: repeat(3, minmax(0, 1fr)); height: calc(100vh - 280px); }
+        .admin-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       }
     </style>
   </head>
