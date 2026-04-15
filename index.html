@@ -412,24 +412,58 @@
       };
       const renderAdmin = () => {
         const list = monthlyList();
-        const filtered = currentAdminTab ? list.filter(item => item[currentAdminTab] > 0) : [];
-        document.getElementById('memberCount').textContent = memberCount();
-        if (!currentAdminTab) {
-          adminList.classList.remove('show');
-          adminList.innerHTML = '';
-          return;
-        }
+        const total = memberCount();
+
+        // 월간 통계 계산
+        const stats = [
+          { key: 'remote', label: '재택근무', color: '#d92d32' },
+          { key: 'vacation', label: '휴가', color: '#E86A1A' },
+          { key: 'halfAm', label: '오전 반차', color: '#cf4376' },
+          { key: 'halfPm', label: '오후 반차', color: '#9333ea' },
+          { key: 'timeoff', label: '반반차', color: '#6d28d9' },
+        ];
+        const counts = stats.map(s => ({
+          ...s,
+          count: list.reduce((sum, item) => sum + (item[s.key] || 0), 0)
+        }));
+        const maxCount = Math.max(...counts.map(c => c.count), 1);
+
+        // 그래프 렌더링
         adminList.classList.add('show');
-        adminList.innerHTML = filtered.length ? filtered.map(item => `
-          <div class="admin-item">
-            <div class="admin-item-main">
-              <strong>${item.name}</strong>
-              <div class="admin-item-team">${displayTeam(item.team)}</div>
-            </div>
-            <div class="admin-count">${item[currentAdminTab]}일</div>
+        adminList.style.display = 'block';
+        adminList.style.gridTemplateColumns = '';
+
+        const chartHtml = `
+          <div style="margin-bottom:14px;">
+            <div style="font-size:11px;color:#999;margin-bottom:10px;">이번 달 근무형태별 누적 현황</div>
+            ${counts.map(c => `
+              <div style="margin-bottom:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                  <span style="font-size:12px;font-weight:700;color:#333;">${c.label}</span>
+                  <span style="font-size:12px;font-weight:800;color:${c.color};">${c.count}일</span>
+                </div>
+                <div style="background:#f0f0f0;border-radius:999px;height:8px;overflow:hidden;">
+                  <div style="height:100%;border-radius:999px;background:${c.color};width:${Math.round((c.count/maxCount)*100)}%;transition:width 0.4s ease;"></div>
+                </div>
+              </div>
+            `).join('')}
           </div>
-        `).join('') : `<div class="admin-item"><div class="admin-item-main"><strong>해당 없음</strong></div><div class="admin-count">0</div></div>`;
-        adminList.scrollTop = 0;
+          <div style="border-top:1px dashed #e7cdb8;padding-top:10px;">
+        `;
+
+        const filtered = currentAdminTab ? list.filter(item => item[currentAdminTab] > 0) : [];
+        const listHtml = currentAdminTab ? `
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;">
+            ${filtered.length ? filtered.map(item => `
+              <div class="admin-item">
+                <div class="admin-item-main"><strong>${item.name}</strong></div>
+                <div class="admin-count">${item[currentAdminTab]}일</div>
+              </div>
+            `).join('') : `<div style="color:#aaa;font-size:13px;grid-column:1/-1;padding:8px 0;">해당 없음</div>`}
+          </div>
+        ` : '';
+
+        adminList.innerHTML = chartHtml + listHtml + '</div>';
       };
       const parseImportedStatus = (raw) => {
         const value = String(raw || '').trim();
