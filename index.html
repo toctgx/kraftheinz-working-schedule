@@ -104,7 +104,6 @@
         <div class="field"><label for="statusSelect">Work Status</label><select id="statusSelect"><option value="office">Office</option><option value="remote">Home</option><option value="vacation">Leave</option><option value="half-am">Half Day AM</option><option value="half-pm">Half Day PM</option><option value="timeoff">Partial Time Off (Time Note)</option></select></div>
         <div class="field" id="timeField" style="display:none;"><label for="timeInput">Time Note</label><input id="timeInput" placeholder="e.g. 15:00~17:00" /></div>
         <div class="btn-row"><button class="primary" id="saveBtn">Save</button><button class="secondary" id="resetBtn">Reset</button></div>
-        <div class="btn-row"><button class="secondary" id="importAprBtn">Import April Sheet</button><button class="secondary" id="applyAprTodayBtn">Apply to Today</button></div>
         <div class="helper">Choose a team, select a name, then save the status to update immediately.</div>
       </section>
 
@@ -558,8 +557,7 @@
         localStorage.removeItem(storageKey);
         location.reload();
       });
-      document.getElementById('importAprBtn').addEventListener('click', importAprilSheet);
-      document.getElementById('applyAprTodayBtn').addEventListener('click', applyImportedSheetToToday);
+
       navButtons.forEach(btn => btn.addEventListener('click', () => showScreen(btn.dataset.screen)));
       document.getElementById('houseRuleBtn').addEventListener('click', () => renderRuleCard('house', monthlyList()));
       document.querySelectorAll('[data-rule]').forEach(btn => btn.addEventListener('click', () => renderRuleCard(btn.dataset.rule, monthlyList())));
