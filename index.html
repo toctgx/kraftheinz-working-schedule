@@ -16,11 +16,11 @@
       .today-card strong { display: block; font-size: 10px; letter-spacing: 0.16em; color: #d92d32; }
       .today-card span { display: block; margin-top: 4px; font-size: 12px; font-weight: 700; }
       .glass { background: #ffffff; border: 1px solid #ececec; border-radius: 22px; box-shadow: 0 14px 24px rgba(0, 0, 0, 0.05); }
-      .screen { display: none; }
-      .screen.active { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
-      #screen-schedule { overflow-y: auto; padding: 14px; }
-      #screen-status { overflow: hidden; padding: 14px 14px 0; display: flex; flex-direction: column; }
-      #screen-admin { overflow: hidden; padding: 14px 14px 0; display: flex; flex-direction: column; }
+      .screen { display: none !important; }
+      .screen.active { display: flex !important; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+      #screen-schedule.active { overflow-y: auto; padding: 14px; }
+      #screen-status.active { overflow: hidden; padding: 14px 14px 0; }
+      #screen-admin.active { overflow: hidden; padding: 14px 14px 0; }
       .scroll-body { flex: 1 1 auto; overflow-y: auto; padding-bottom: 84px; }
       .hero-metrics { display:none; }
       .panel-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
