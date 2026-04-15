@@ -92,6 +92,15 @@
       .nav-btn.active { color: #d92d32; }
       .nav-btn svg { transition: none; }
 
+      /* ── 업데이트 배너 ── */
+      .update-banner { display: none; background: #1a1a1a; color: #fff; padding: 10px 16px; font-size: 13px; font-weight: 600; display: none; justify-content: space-between; align-items: center; }
+      .update-banner.show { display: flex; }
+      .update-banner button { background: #d92d32; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; min-height: unset; }
+
+      /* ── Pull to Refresh ── */
+      .ptr-indicator { text-align: center; padding: 0; font-size: 12px; color: #bbb; max-height: 0; overflow: hidden; transition: max-height 0.2s, padding 0.2s; }
+      .ptr-indicator.pulling { max-height: 40px; padding: 10px 0; }
+
       /* ── PIN ── */
       .pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #ccc; background: transparent; transition: background 0.15s; }
       .pin-dot.filled { background: #1a1a1a; border-color: #1a1a1a; }
@@ -124,6 +133,10 @@
   </head>
   <body>
     <div class="toast" id="toast">저장되었습니다.</div>
+    <div class="update-banner" id="updateBanner">
+      <span>새로운 버전이 있습니다.</span>
+      <button onclick="location.reload()">업데이트</button>
+    </div>
     <div class="app">
 
       <!-- 앱 헤더 -->
@@ -841,10 +854,35 @@
       };
       autoApplySheetIfNeeded();
 
-      // PWA 서비스워커 등록
+      // PWA 서비스워커 등록 + 업데이트 감지
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').catch(() => {});
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                document.getElementById('updateBanner').classList.add('show');
+              }
+            });
+          });
+        }).catch(() => {});
+
+        // 서비스워커 활성화 시 자동 새로고침
+        navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
       }
+
+      // Pull to Refresh
+      let ptStartY = 0;
+      let ptPulling = false;
+      const appEl = document.querySelector('.app');
+      appEl.addEventListener('touchstart', e => { ptStartY = e.touches[0].clientY; }, { passive: true });
+      appEl.addEventListener('touchmove', e => {
+        const dy = e.touches[0].clientY - ptStartY;
+        if (dy > 60 && appEl.scrollTop === 0) ptPulling = true;
+      }, { passive: true });
+      appEl.addEventListener('touchend', () => {
+        if (ptPulling) { ptPulling = false; location.reload(); }
+      });
     </script>
   </body>
 </html>
