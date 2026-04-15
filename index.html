@@ -19,8 +19,9 @@
       .screen { display: none; }
       .screen.active { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
       #screen-schedule { overflow-y: auto; padding: 14px; }
-      #screen-status { overflow: hidden; padding: 14px 14px 0; }
-      #screen-admin { overflow: hidden; padding: 14px 14px 0; }
+      #screen-status { overflow: hidden; padding: 14px 14px 0; display: flex; flex-direction: column; }
+      #screen-admin { overflow: hidden; padding: 14px 14px 0; display: flex; flex-direction: column; }
+      .scroll-body { flex: 1 1 auto; overflow-y: auto; padding-bottom: 84px; }
       .hero-metrics { display:none; }
       .panel-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
       .panel-title h2 { margin: 0; font-size: 17px; letter-spacing: -0.05em; }
@@ -114,7 +115,7 @@
 
       <section class="screen glass" id="screen-status">
         <div class="team-tabs" id="teamTabs"></div>
-        <div id="teamBoard"></div>
+        <div class="scroll-body" id="teamBoard"></div>
       </section>
 
       <section class="screen glass" id="screen-admin">
@@ -124,12 +125,14 @@
           <button class="rule-tab" data-rule="overwork" type="button">재택 초과</button>
           <button class="rule-tab" data-rule="consecutive" type="button">연속 재택</button>
         </div>
-        <div class="rule-card" id="ruleCard"></div>
-        <div class="metrics-grid">
-          <div class="metric"><small>전체 인원</small><strong id="memberCount">0</strong><span>전체 팀 등록 인원</span></div>
+        <div class="scroll-body">
+          <div class="rule-card" id="ruleCard"></div>
+          <div class="metrics-grid">
+            <div class="metric"><small>전체 인원</small><strong id="memberCount">0</strong><span>전체 팀 등록 인원</span></div>
+          </div>
+          <div class="admin-tabs" id="adminTabs"></div>
+          <div class="admin-list" id="adminList"></div>
         </div>
-        <div class="admin-tabs" id="adminTabs"></div>
-        <div class="admin-list" id="adminList"></div>
       </section>
     </div>
     <nav class="bottom-nav">
