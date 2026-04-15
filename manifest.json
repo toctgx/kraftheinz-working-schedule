@@ -1,22 +1,26 @@
 {
-  "name": "KHK Working Schedule",
-  "short_name": "KHK Schedule",
+  "name": "Kraft Heinz Korea Working Schedule",
+  "short_name": "KH Schedule",
   "description": "Kraft Heinz Korea 근무 현황 보드",
   "start_url": "/kraftheinz-working-schedule/",
+  "scope": "/kraftheinz-working-schedule/",
   "display": "standalone",
-  "background_color": "#f2f2f2",
+  "background_color": "#ffffff",
   "theme_color": "#d92d32",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
+  "lang": "ko",
   "icons": [
     {
       "src": "assets/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "assets/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
