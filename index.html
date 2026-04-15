@@ -24,8 +24,8 @@
       .screen.active { display: block; }
       #screen-schedule.active { padding: 14px; }
       #screen-status.active { padding: 0; overflow: hidden; }
-      .status-tabs-fixed { padding: 0 14px 8px; background: #f2f2f2; }
-      .status-scroll { overflow-y: auto; padding: 0 14px 84px; max-height: calc(100vh - 200px); }
+      .status-tabs-fixed { position: sticky; top: 0; z-index: 10; padding: 0 14px 8px; background: #f2f2f2; }
+      .status-scroll { padding: 0 14px 84px; }
       #screen-admin.active { padding: 14px 14px 0; }
       .hero-metrics { display:none; }
       .panel-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -48,7 +48,7 @@
       .team-tabs, .admin-tabs, .rule-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; margin-bottom: 8px; }
       .team-tab, .admin-tab, .rule-tab { flex: 0 0 auto; min-height: 36px; padding: 0 14px; border-radius: 999px; background: #ffffff; color: #686868; border: 1px solid #e7e7e7; font-size: 11px; touch-action: manipulation; }
       .team-tab.active, .admin-tab.active, .rule-tab.active { background: #d92d32; color: white; border-color: transparent; box-shadow: 0 8px 16px rgba(217,45,50,0.18); }
-      .team-card { padding: 10px; border-radius: 20px; background: #ffffff; border: 1px solid #ececec; }
+      .team-card { padding: 0; }
       .team-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
       .team-head h3 { margin: 0; font-size: 15px; letter-spacing: 0.04em; }
       .badge { background: #fff1f2; color: #d92d32; border-radius: 999px; padding: 6px 10px; font-size: 11px; font-weight: 800; }
