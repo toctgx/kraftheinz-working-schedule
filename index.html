@@ -174,8 +174,8 @@
         </div>
         <div class="tab-bar" id="adminTabs"></div>
         <div class="scroll-area" id="adminScrollArea">
+          <div id="ruleBox" style="margin-bottom:12px;"></div>
           <div id="adminList"></div>
-          <div id="ruleBox"></div>
         </div>
       </section>
 
@@ -687,6 +687,7 @@
           currentRuleTab = btn.dataset.rule;
           document.querySelectorAll('#ruleTabs .tab-btn').forEach(b => b.classList.toggle('active', b.dataset.rule === currentRuleTab));
           renderRuleCard(currentRuleTab);
+          document.getElementById('adminScrollArea').scrollTop = 0;
         }
       }));
 
