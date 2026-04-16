@@ -680,7 +680,8 @@
         { key: 'vacation', label: '휴가', match: member => member.status === 'vacation' },
         { key: 'half-am', label: '오전 반차', match: member => member.status === 'half-am' },
         { key: 'half-pm', label: '오후 반차', match: member => member.status === 'half-pm' },
-        { key: 'timeoff', label: '반반차', match: member => member.status === 'timeoff' }
+        { key: 'timeoff', label: '반반차', match: member => member.status === 'timeoff' },
+        { key: 'fieldwork', label: '외근', match: member => member.status === 'fieldwork' }
       ];
       const renderTeamTabs = () => {
         teamTabs.innerHTML = statusViews.map(view => `<button class="tab-btn ${view.key === currentTeam ? 'active' : ''}" data-team="${view.key}">${view.label}</button>`).join('');
