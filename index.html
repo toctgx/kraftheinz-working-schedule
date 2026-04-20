@@ -461,25 +461,29 @@
       let alarmLogs = JSON.parse(localStorage.getItem(alarmKey) || '[]');
       let alarmOpen = false;
 
+      const todayStr = () => new Date().toLocaleDateString('ko-KR');
+
       const renderAlarm = () => {
         const badge = document.getElementById('alarmBadge');
         const items = document.getElementById('alarmItems');
-        const unread = alarmLogs.filter(a => !a.read).length;
+        // 당일 로그만 필터
+        const todayLogs = alarmLogs.filter(a => a.date === todayStr());
+        const unread = todayLogs.filter(a => !a.read).length;
         badge.style.display = unread > 0 ? 'block' : 'none';
         badge.textContent = unread;
-        items.innerHTML = alarmLogs.length ? alarmLogs.slice().reverse().map(a => `
+        items.innerHTML = todayLogs.length ? todayLogs.slice().reverse().map(a => `
           <div class="alarm-item">
             <span class="alarm-item-text"><strong>${a.name}</strong> 근무 상태를 <strong>${a.status}</strong>으로 변경했습니다.</span>
             <span class="alarm-item-time">${a.time}</span>
           </div>
-        `).join('') : '<div class="alarm-empty">변경 내역이 없습니다.</div>';
+        `).join('') : '<div class="alarm-empty">오늘 변경 내역이 없습니다.</div>';
       };
       const addAlarm = (name, status, timeNote) => {
         const now = new Date();
         const time = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
         const label = status === 'timeoff' && timeNote ? `반반차 ${timeNote}` : (statusLabels[status] || status);
-        alarmLogs.push({ name, status: label, time, read: false });
-        if (alarmLogs.length > 50) alarmLogs = alarmLogs.slice(-50);
+        alarmLogs.push({ name, status: label, time, date: todayStr(), read: false });
+        if (alarmLogs.length > 200) alarmLogs = alarmLogs.slice(-200);
         localStorage.setItem(alarmKey, JSON.stringify(alarmLogs));
         renderAlarm();
       };
@@ -489,7 +493,7 @@
         document.getElementById('alarmList').classList.toggle('open', alarmOpen);
         document.getElementById('alarmChevron').classList.toggle('open', alarmOpen);
         if (alarmOpen) {
-          alarmLogs = alarmLogs.map(a => ({ ...a, read: true }));
+          alarmLogs = alarmLogs.map(a => a.date === todayStr() ? { ...a, read: true } : a);
           localStorage.setItem(alarmKey, JSON.stringify(alarmLogs));
           renderAlarm();
         }
