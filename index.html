@@ -74,6 +74,7 @@
       .chip-half { background: #ffeaf0; color: #cf4376; }
       .chip-timeoff { background: #f4ecff; color: #6d28d9; }
       .chip-fieldwork { background: #e8f5e9; color: #2e7d32; }
+      .chip-special { background: #fff8e1; color: #e65100; }
       .list-header { display: flex; justify-content: space-between; align-items: center; padding: 0 2px 10px; }
       .list-header-title { font-size: 15px; font-weight: 800; color: #1a1a1a; }
       .list-header-count { font-size: 13px; font-weight: 700; color: #d92d32; }
@@ -397,9 +398,10 @@
               const found = sheetMembers.find(s => s.name === m.name);
               if (!found) return m;
               // Apps Script status → 앱 내부 status 매핑
-              const statusMap2 = { home: 'remote', dayoff: 'vacation', office: 'office', special: 'office' };
+              const statusMap2 = { home: 'remote', dayoff: 'vacation', office: 'office', special: 'special' };
               const mappedStatus = statusMap2[found.status] || 'office';
-              return { ...m, status: mappedStatus, timeNote: found.timeNote || '' };
+              const mappedNote = found.status === 'special' ? found.timeNote : (found.timeNote || '');
+              return { ...m, status: mappedStatus, timeNote: mappedNote };
             });
           });
           persist();
@@ -758,7 +760,8 @@
         { key: 'half-am', label: '오전 반차', match: member => member.status === 'half-am' },
         { key: 'half-pm', label: '오후 반차', match: member => member.status === 'half-pm' },
         { key: 'timeoff', label: '반반차', match: member => member.status === 'timeoff' },
-        { key: 'fieldwork', label: '외근', match: member => member.status === 'fieldwork' }
+        { key: 'fieldwork', label: '외근', match: member => member.status === 'fieldwork' },
+        { key: 'special', label: '기타', match: member => member.status === 'special' }
       ];
       const renderTeamTabs = () => {
         teamTabs.innerHTML = statusViews.map(view => `<button class="tab-btn ${view.key === currentTeam ? 'active' : ''}" data-team="${view.key}">${view.label}</button>`).join('');
@@ -768,11 +771,11 @@
           renderTeamBoard();
         }));
       };
-      const chipClass = { office: 'chip-office', remote: 'chip-remote', vacation: 'chip-vacation', 'half-am': 'chip-half', 'half-pm': 'chip-half', timeoff: 'chip-timeoff', fieldwork: 'chip-fieldwork' };
+      const chipClass = { office: 'chip-office', remote: 'chip-remote', vacation: 'chip-vacation', 'half-am': 'chip-half', 'half-pm': 'chip-half', timeoff: 'chip-timeoff', fieldwork: 'chip-fieldwork', special: 'chip-special' };
       const renderTeamBoard = () => {
         const currentView = statusViews.find(view => view.key === currentTeam) || statusViews[0];
         const members = teams.flatMap(team => state.members[team].map(member => ({ ...member, team }))).filter(currentView.match);
-        const chipLabel = (member) => member.status === 'timeoff' && member.timeNote ? '반반차 ' + member.timeNote : member.status === 'fieldwork' ? '외근' : member.timeNote ? member.timeNote : displayTeam(member.team);
+        const chipLabel = (member) => member.status === 'timeoff' && member.timeNote ? '반반차 ' + member.timeNote : member.status === 'fieldwork' ? '외근' : member.status === 'special' ? (member.timeNote || '기타') : member.timeNote ? member.timeNote : displayTeam(member.team);
         teamBoard.innerHTML = members.length ? `
           <div class="list-header">
             <span class="list-header-count">${members.length}명</span>
