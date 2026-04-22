@@ -249,7 +249,7 @@
               <ul style="margin-top:10px;padding-left:18px;">
                 <li style="font-size:13px;color:#8f1d22;line-height:1.8;">재택근무는 기본적으로 주 2일로 제한됩니다.</li>
                 <li style="font-size:13px;color:#8f1d22;line-height:1.8;">재택근무는 2일 연속으로 등록할 수 없습니다.</li>
-                <li style="font-size:13px;color:#8f1d22;line-height:1.8;">Cycle meeting 전원 오피스 출근</li>
+                <li style="font-size:13px;color:#8f1d22;line-height:1.8;">Cycle meeting 전원 오피스</li>
                 <li style="font-size:13px;color:#8f1d22;line-height:1.8;">Manager 월요일 오피스 필수</li>
                 <li style="font-size:13px;color:#8f1d22;line-height:1.8;">회사 이벤트에 따라 유동적 운영</li>
               </ul>
@@ -382,7 +382,7 @@
         .replace('LOGISTICS TEAM', 'LOGISTICS')
         .replace('HR TEAM', 'HR');
       const storageKey = 'khk-work-status-demo-v7';
-      const SHEETS_API = 'https://script.google.com/macros/s/AKfycbzeSRa0JvqwQkhxTiZFdRB2quPRGESpDokyYK8T4buGhN5fbWK0G3AkC-tlcqnPZ8w3/exec';
+      const SHEETS_API = 'https://script.google.com/macros/s/AKfycbw0-Eo9q2-gJ3xUbmj6JjiAYzkPcloXaFsNCGaD2Qo46JvwQP4w2VeUWVo-S7BM_-Ky/exec';
 
       // 구글 시트에서 데이터 경료
       const syncFromSheets = async () => {
@@ -395,7 +395,11 @@
             if (!sheetMembers) return;
             state.members[team] = state.members[team].map(m => {
               const found = sheetMembers.find(s => s.name === m.name);
-              return found ? { ...m, status: found.status, timeNote: found.timeNote || '' } : m;
+              if (!found) return m;
+              // Apps Script status → 앱 내부 status 매핑
+              const statusMap2 = { home: 'remote', dayoff: 'vacation', office: 'office', special: 'office' };
+              const mappedStatus = statusMap2[found.status] || 'office';
+              return { ...m, status: mappedStatus, timeNote: found.timeNote || '' };
             });
           });
           persist();
