@@ -382,7 +382,7 @@
         .replace('LOGISTICS TEAM', 'LOGISTICS')
         .replace('HR TEAM', 'HR');
       const storageKey = 'khk-work-status-demo-v7';
-      const SHEETS_API = 'https://script.google.com/macros/s/AKfycbzQ3LKGTFK7fAy-lfONlpZudn4MYVeg_Xxp5bAfZiU4UFXL6i37qLcnncFOziJdTVF1/exec';
+      const SHEETS_API = 'https://script.google.com/macros/s/AKfycbxLRwwDyRaJPck1CVobRDVYEcVxa1uR4N5H3JIO4YoHT9M0HXO-W46oi_sfKzvp_RUw/exec';
 
       // 구글 시트에서 데이터 경료
       const syncFromSheets = async () => {
@@ -512,11 +512,30 @@
 
       async function loadCalendarData() {
         try {
-          const res = await fetch('assets/schedule_apr.json?v=' + Date.now());
-          scheduleData = await res.json();
+          const res = await fetch(SHEETS_API + '?v=' + Date.now());
+          const json = await res.json();
+          if (json.ok && json.calendar) {
+            scheduleData = json.calendar;
+          } else {
+            // fallback: 로컬 json
+            const res2 = await fetch('assets/schedule_apr.json?v=' + Date.now());
+            scheduleData = await res2.json();
+          }
         } catch(e) { scheduleData = {}; }
         renderCalendar();
       }
+
+      // 1분마다 달력 데이터 자동 갱신
+      setInterval(async () => {
+        try {
+          const res = await fetch(SHEETS_API + '?v=' + Date.now());
+          const json = await res.json();
+          if (json.ok && json.calendar) {
+            scheduleData = json.calendar;
+            renderCalendar();
+          }
+        } catch(e) {}
+      }, 60 * 1000);
 
       function renderCalendar() {
         const today = new Date();
