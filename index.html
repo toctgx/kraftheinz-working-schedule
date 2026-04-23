@@ -519,16 +519,28 @@
       let scheduleData = null;
       let selectedDay = null;
 
+      // 주말 필터링 함수
+      const filterWeekends = (calendar) => {
+        const result = {};
+        for (const [day, arr] of Object.entries(calendar)) {
+          const d = parseInt(day);
+          const dow = new Date(2026, 3, d).getDay(); // 0=일, 6=토
+          if (dow === 0 || dow === 6) continue; // 주말 제거
+          result[day] = arr;
+        }
+        return result;
+      };
+
       async function loadCalendarData() {
         try {
           const res = await fetch(SHEETS_API + '?v=' + Date.now());
           const json = await res.json();
           if (json.ok && json.calendar) {
-            scheduleData = json.calendar;
+            scheduleData = filterWeekends(json.calendar);
           } else {
             // fallback: 로컬 json
             const res2 = await fetch('assets/schedule_apr.json?v=' + Date.now());
-            scheduleData = await res2.json();
+            scheduleData = filterWeekends(await res2.json());
           }
         } catch(e) { scheduleData = {}; }
         renderCalendar();
@@ -540,7 +552,7 @@
           const res = await fetch(SHEETS_API + '?v=' + Date.now());
           const json = await res.json();
           if (json.ok && json.calendar) {
-            scheduleData = json.calendar;
+            scheduleData = filterWeekends(json.calendar);
             renderCalendar();
           }
         } catch(e) {}
