@@ -117,6 +117,7 @@
       .cal-day.weekend-off .cal-day-num { color:#bbb; }
       .cal-dots { display:flex; gap:2px; justify-content:center; }
       .cal-dot { width:4px; height:4px; border-radius:50%; }
+      .dot-office { background:#1f7a43; }
       .dot-home { background:#1565c0; }
       .dot-off { background:#e53935; }
       .day-detail-card { background:#fff; border-radius:12px; padding:14px; margin:0 0 8px; border:1px solid #efefef; }
@@ -148,7 +149,7 @@
       .cal-day.sat .cal-day-num{color:#1565c0;}
       .cal-dots{display:flex;gap:2px;justify-content:center;min-height:5px;}
       .cal-dot{width:4px;height:4px;border-radius:50%;}
-      .dot-home{background:#1565c0;} .dot-off{background:#e53935;}
+      .dot-office{background:#1f7a43;} .dot-home{background:#1565c0;} .dot-off{background:#e53935;}
       .day-detail-card{background:#fff;border-radius:12px;padding:14px;margin-bottom:8px;border:1px solid #efefef;}
       .day-detail-title{font-size:14px;font-weight:800;margin-bottom:10px;color:#1a1a1a;}
       .day-section{margin-bottom:10px;}
@@ -580,12 +581,14 @@
           const data = (!isWeekend && scheduleData?.[String(d)]) ? scheduleData[String(d)] : [];
           const homeCount = data.filter(p=>p.status==='H').length;
           const offCount = data.filter(p=>p.status.startsWith('D')).length;
+          const officeCount = data.filter(p=>p.status==='O').length;
           let cls = 'cal-day';
           if (dow===0) cls+=' sun'; if (dow===6) cls+=' sat';
           if (isWeekend) cls+=' weekend-off';
           if (d===todayDay) cls+=' today';
           else if (d===selectedDay) cls+=' selected';
           let dots = '';
+          if (!isWeekend && officeCount>0) dots+=`<div class="cal-dot dot-office"></div>`;
           if (!isWeekend && homeCount>0) dots+=`<div class="cal-dot dot-home"></div>`;
           if (!isWeekend && offCount>0) dots+=`<div class="cal-dot dot-off"></div>`;
           html+=`<div class="${cls}" onclick="selectDay(${d})">
