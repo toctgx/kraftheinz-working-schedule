@@ -1,16 +1,26 @@
-const CACHE_NAME = 'khk-schedule-v3';
-const ASSETS = [
+const CACHE_VERSION = '4';
+const CACHE_NAME = 'khk-schedule-v' + CACHE_VERSION;
+
+const STATIC_ASSETS = [
   '/kraftheinz-working-schedule/',
   '/kraftheinz-working-schedule/index.html',
   '/kraftheinz-working-schedule/manifest.json',
   '/kraftheinz-working-schedule/assets/icon-192.png',
   '/kraftheinz-working-schedule/assets/icon-512.png',
+  '/kraftheinz-working-schedule/assets/icon-180.png',
+  '/kraftheinz-working-schedule/assets/kh-logo.jpg',
+];
+
+// Apps Script URL 패턴 - 캐시 안 함
+const NO_CACHE_PATTERNS = [
+  'script.google.com',
+  'script.googleusercontent.com',
 ];
 
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(ASSETS))
+      .then(cache => cache.addAll(STATIC_ASSETS))
       .catch(() => {})
   );
   self.skipWaiting();
@@ -26,13 +36,22 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // 항상 네트워크 우선, 실패 시 캐시
+  const url = e.request.url;
+
+  // Apps Script 요청 → 항상 네트워크만 (캐시 안 함)
+  if (NO_CACHE_PATTERNS.some(p => url.includes(p))) {
+    e.respondWith(fetch(e.request));
+    return;
+  }
+
+  // 정적 파일 → 네트워크 우선, 실패 시 캐시
   e.respondWith(
     fetch(e.request)
       .then(response => {
-        // 성공하면 캐시 업데이트
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        }
         return response;
       })
       .catch(() => caches.match(e.request))
