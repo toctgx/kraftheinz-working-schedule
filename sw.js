@@ -1,14 +1,14 @@
-const CACHE_VERSION = '5';
-const CACHE_NAME = 'khk-schedule-v' + CACHE_VERSION;
+const CACHE_VERSION = '1';
+const CACHE_NAME = 'khk-schedule-v2-v' + CACHE_VERSION;
 
 const STATIC_ASSETS = [
-  '/kraftheinz-working-schedule/',
-  '/kraftheinz-working-schedule/index.html',
-  '/kraftheinz-working-schedule/manifest.json',
-  '/kraftheinz-working-schedule/assets/icon-192.png',
-  '/kraftheinz-working-schedule/assets/icon-512.png',
-  '/kraftheinz-working-schedule/assets/icon-180.png',
-  '/kraftheinz-working-schedule/assets/kh-logo.jpg',
+  '/kraftheinz-working-schedule-v2/',
+  '/kraftheinz-working-schedule-v2/index.html',
+  '/kraftheinz-working-schedule-v2/manifest.json',
+  '/kraftheinz-working-schedule-v2/assets/icon-192.png',
+  '/kraftheinz-working-schedule-v2/assets/icon-512.png',
+  '/kraftheinz-working-schedule-v2/assets/icon-180.png',
+  '/kraftheinz-working-schedule-v2/assets/kh-logo.jpg',
 ];
 
 // Apps Script URL 패턴 - 캐시 안 함

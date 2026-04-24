@@ -161,6 +161,13 @@
       .chip-off{background:#fce4ec;color:#c62828;}
       .chip-special{background:#fff8e1;color:#e65100;}
 
+      /* ── 달력 월 네비 ── */
+      .cal-month-nav { flex:0 0 auto; background:#fff; border-bottom:1px solid #efefef; display:flex; align-items:center; justify-content:center; gap:20px; padding:10px 16px; }
+      .cal-nav-btn { background:none; border:1px solid #e0e0e0; border-radius:8px; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#1a1a1a; font-size:20px; font-weight:700; font-family:inherit; line-height:1; padding:0; }
+      .cal-nav-btn:active { background:#f4f4f6; }
+      .cal-nav-btn:disabled { color:#ccc; border-color:#eee; cursor:default; }
+      .cal-nav-label { font-size:17px; font-weight:800; color:#1a1a1a; min-width:90px; text-align:center; letter-spacing:-0.02em; }
+
       /* ── 하단 네비 ── */
       .bottom-nav { flex: 0 0 auto; background: #ffffff; border-top: 1px solid #efefef; padding: 6px 0 max(6px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(4, 1fr); }
       .nav-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px 0; border: none; background: transparent; color: #bbb; font: inherit; font-size: 11px; font-weight: 600; cursor: pointer; }
@@ -314,6 +321,11 @@
       <!-- 관리자 화면 -->
       <!-- 달력 화면 -->
       <section class="screen" id="screen-calendar">
+        <div class="cal-month-nav" id="calMonthNav">
+          <button class="cal-nav-btn" id="calPrevBtn">&#8249;</button>
+          <span class="cal-nav-label" id="calMonthLabel">--</span>
+          <button class="cal-nav-btn" id="calNextBtn">&#8250;</button>
+        </div>
         <div class="scroll-area" id="calendarScrollArea">
           <div id="calendarView"></div>
           <!-- 날짜 상세 패널 -->
@@ -393,7 +405,7 @@
         .replace('LOGISTICS TEAM', 'LOGISTICS')
         .replace('HR TEAM', 'HR');
       const storageKey = 'khk-work-status-demo-v7';
-      const SHEETS_API = 'https://script.google.com/macros/s/AKfycbz3Ci7yfsyF-rHPmUn8f0cv8zKvbS75W9ypmgOdCujTuZO1-7Jj62NwBsOCni0vg98w/exec';
+      const SHEETS_API = 'https://script.google.com/macros/s/AKfycbzMhh0z8vbY2gPogVN3Vw2dVyFAL8inrmyqiZv2PEjZeu-zbjLgdBKIMLTRe1FElruz/exec';
 
       // 구글 시트에서 데이터 경료
       const syncFromSheets = async () => {
@@ -525,34 +537,129 @@
       // ── 달력 ──
       let scheduleData = null;
       let selectedDay = null;
+      let availableMonths = [];
+      let selectedMonth = null;
+      let currentMonthInfo = null;
+
+      // 2026 한국 공휴일 (월:일 형식)
+      const KR_HOLIDAYS = {
+        '1-1':  '신정',
+        '1-28': '설날 연휴', '1-29': '설날', '1-30': '설날 연휴',
+        '3-1':  '삼일절',
+        '5-1':  '근로자의 날',
+        '5-5':  '어린이날',
+        '5-25': '부처님 오신 날',
+        '6-6':  '현충일',
+        '8-15': '광복절',
+        '9-24': '추석 연휴', '9-25': '추석', '9-26': '추석 연휴',
+        '10-3': '개천절',
+        '10-9': '한글날',
+        '12-25':'성탄절'
+      };
+
+      const isHoliday = (year, month, day) => {
+        const key = `${month}-${day}`;
+        return KR_HOLIDAYS[key] || null;
+      };
 
       // 주말 필터링 함수
-      const filterWeekends = (calendar) => {
+      const filterWeekends = (calendar, year, month) => {
         const result = {};
+        const y = year ? (year < 100 ? 2000 + year : year) : new Date().getFullYear();
+        const m = month ? month - 1 : new Date().getMonth();
         for (const [day, arr] of Object.entries(calendar)) {
           const d = parseInt(day);
-          const dow = new Date(2026, 3, d).getDay(); // 0=일, 6=토
-          if (dow === 0 || dow === 6) continue; // 주말 제거
+          const dow = new Date(y, m, d).getDay();
+          if (dow === 0 || dow === 6) continue;
           result[day] = arr;
         }
         return result;
       };
 
-      async function loadCalendarData() {
+      async function loadCalendarData(sheetName) {
         document.getElementById('calendarView').innerHTML = '<div style="text-align:center;padding:60px 0;color:#bbb;font-size:14px;font-weight:600;">Loading ...</div>';
         try {
-          const res = await fetch(SHEETS_API + '?v=' + Date.now());
+          const url = sheetName
+            ? SHEETS_API + '?v=' + Date.now() + '&sheet=' + encodeURIComponent(sheetName)
+            : SHEETS_API + '?v=' + Date.now();
+          const res = await fetch(url);
           const json = await res.json();
           if (json.ok && json.calendar) {
-            scheduleData = filterWeekends(json.calendar);
+            // availableMonths: API에서 받거나, 없으면 현재 월 기준 앞뒤 3개월 자동생성
+            if (json.availableMonths && json.availableMonths.length) {
+              availableMonths = json.availableMonths;
+            } else if (!availableMonths.length) {
+              const _t = new Date();
+              const _cy = _t.getFullYear() % 100, _cm = _t.getMonth() + 1;
+              availableMonths = [];
+              for (let off = -1; off <= 2; off++) {
+                let y = _cy, m = _cm + off;
+                if (m <= 0) { y--; m += 12; }
+                if (m > 12) { y++; m -= 12; }
+                availableMonths.push({ year: y, month: m, name: `${y}년 ${m}월` });
+              }
+            }
+            if (json.currentMonth && !selectedMonth) {
+              currentMonthInfo = json.currentMonth;
+              selectedMonth = json.currentMonth;
+            } else if (!selectedMonth) {
+              const _t2 = new Date();
+              selectedMonth = { year: _t2.getFullYear() % 100, month: _t2.getMonth() + 1,
+                name: `${_t2.getFullYear() % 100}년 ${_t2.getMonth() + 1}월` };
+            }
+            renderMonthTabs();
+            const yr = selectedMonth ? selectedMonth.year : null;
+            const mo = selectedMonth ? selectedMonth.month : null;
+            scheduleData = filterWeekends(json.calendar, yr, mo);
           } else {
-            // fallback: 로컬 json
-            const res2 = await fetch('assets/schedule_apr.json?v=' + Date.now());
-            scheduleData = filterWeekends(await res2.json());
+            scheduleData = {};
           }
         } catch(e) { scheduleData = {}; }
         renderCalendar();
       }
+
+      function renderMonthTabs() {
+        const label = document.getElementById('calMonthLabel');
+        const prevBtn = document.getElementById('calPrevBtn');
+        const nextBtn = document.getElementById('calNextBtn');
+        if (!label) return;
+        const sm = selectedMonth;
+        if (sm) {
+          const fullYear = sm.year < 100 ? 2000 + sm.year : sm.year;
+          label.textContent = `${fullYear}.${String(sm.month).padStart(2, '0')}`;
+        }
+        if (prevBtn && nextBtn && availableMonths.length) {
+          const idx = availableMonths.findIndex(m => sm && m.year === sm.year && m.month === sm.month);
+          prevBtn.disabled = idx <= 0;
+          nextBtn.disabled = idx < 0 || idx >= availableMonths.length - 1;
+        }
+      }
+
+      function navigateMonth(dir) {
+        if (!availableMonths.length) return;
+        const idx = availableMonths.findIndex(m =>
+          selectedMonth && m.year === selectedMonth.year && m.month === selectedMonth.month
+        );
+        // idx가 -1이면 (선택된 월이 목록에 없으면) 현재 월 위치 기준으로 구성
+        const base = idx === -1 ? 0 : idx;
+        const newIdx = base + dir;
+        if (newIdx < 0) return;
+        // 다음 월이 목록 밖이면 자동 생성
+        if (newIdx >= availableMonths.length) {
+          const last = availableMonths[availableMonths.length - 1];
+          let ny = last.year, nm = last.month + 1;
+          if (nm > 12) { ny++; nm = 1; }
+          availableMonths.push({ year: ny, month: nm, name: `${ny}년 ${nm}월` });
+        }
+        const m = availableMonths[newIdx];
+        selectedMonth = { year: m.year, month: m.month, name: m.name };
+        selectedDay = null;
+        document.getElementById('dayDetail').style.display = 'none';
+        loadCalendarData(m.name);
+      }
+
+      document.getElementById('calPrevBtn').addEventListener('click', () => navigateMonth(-1));
+      document.getElementById('calNextBtn').addEventListener('click', () => navigateMonth(1));
 
       // 1분마다 달력 데이터 자동 갱신
       setInterval(async () => {
@@ -560,7 +667,9 @@
           const res = await fetch(SHEETS_API + '?v=' + Date.now());
           const json = await res.json();
           if (json.ok && json.calendar) {
-            scheduleData = filterWeekends(json.calendar);
+            const yr = selectedMonth ? selectedMonth.year : null;
+            const mo = selectedMonth ? selectedMonth.month : null;
+            scheduleData = filterWeekends(json.calendar, yr, mo);
             renderCalendar();
           }
         } catch(e) {}
@@ -568,14 +677,15 @@
 
       function renderCalendar() {
         const today = new Date();
-        const isApr = today.getMonth() === 3;
-        const todayDay = isApr ? today.getDate() : null;
-        const firstDow = new Date(2026, 3, 1).getDay();
-        const daysInMonth = 30;
+        const sm = selectedMonth || currentMonthInfo || { year: today.getFullYear() % 100, month: today.getMonth() + 1 };
+        const fullYear = sm.year < 100 ? 2000 + sm.year : sm.year;
+        const isCurrentMonth = today.getFullYear() === fullYear && (today.getMonth() + 1) === sm.month;
+        const todayDay = isCurrentMonth ? today.getDate() : null;
+        const firstDow = new Date(fullYear, sm.month - 1, 1).getDay();
+        const daysInMonth = new Date(fullYear, sm.month, 0).getDate();
         const DOWS = ['일','월','화','수','목','금','토'];
         let html = `
-          <div class="cal-header">
-            <span class="cal-month-title">2026년 4월</span>
+          <div style="text-align:right;padding:8px 4px 4px;">
             <span style="font-size:11px;color:#aaa;">날짜를 터치하세요</span>
           </div>
           <div class="cal-grid">
@@ -583,24 +693,29 @@
         `;
         for (let i = 0; i < firstDow; i++) html += `<div class="cal-day empty"></div>`;
         for (let d = 1; d <= daysInMonth; d++) {
-          const dow = (firstDow + d - 1) % 7;
+          const dow = new Date(fullYear, sm.month - 1, d).getDay();
           const isWeekend = dow===0 || dow===6;
-          const data = (!isWeekend && scheduleData?.[String(d)]) ? scheduleData[String(d)] : [];
+          const holidayName = isHoliday(fullYear, sm.month, d);
+          const isDayOff = isWeekend || !!holidayName;
+          const data = (!isDayOff && scheduleData?.[String(d)]) ? scheduleData[String(d)] : [];
           const homeCount = data.filter(p=>p.status==='H').length;
           const offCount = data.filter(p=>p.status.startsWith('D')).length;
           const officeCount = data.filter(p=>p.status==='O').length;
           let cls = 'cal-day';
-          if (dow===0) cls+=' sun'; if (dow===6) cls+=' sat';
-          if (isWeekend) cls+=' weekend-off';
+          if (dow===0 || holidayName) cls+=' sun';
+          else if (dow===6) cls+=' sat';
+          if (isDayOff) cls+=' weekend-off';
           if (d===todayDay) cls+=' today';
           else if (d===selectedDay) cls+=' selected';
           let dots = '';
-          if (!isWeekend && officeCount>0) dots+=`<div class="cal-dot dot-office"></div>`;
-          if (!isWeekend && homeCount>0) dots+=`<div class="cal-dot dot-home"></div>`;
-          if (!isWeekend && offCount>0) dots+=`<div class="cal-dot dot-off"></div>`;
+          if (!isDayOff && officeCount>0) dots+=`<div class="cal-dot dot-office"></div>`;
+          if (!isDayOff && homeCount>0) dots+=`<div class="cal-dot dot-home"></div>`;
+          if (!isDayOff && offCount>0) dots+=`<div class="cal-dot dot-off"></div>`;
+          // 공휴일 표시 (holiday 표시를 위한 작은 배지)
+          const holidayBadge = holidayName ? `<span style="font-size:8px;color:#e53935;font-weight:700;line-height:1;">공휴</span>` : '';
           html+=`<div class="${cls}" onclick="selectDay(${d})">
             <span class="cal-day-num">${d}</span>
-            <div class="cal-dots">${dots}</div>
+            ${holidayName ? holidayBadge : `<div class="cal-dots">${dots}</div>`}
           </div>`;
         }
         html += `</div>`;
@@ -617,17 +732,22 @@
       function renderDayDetail(d) {
         const el = document.getElementById('dayDetail');
         const DOW_KO = ['일','월','화','수','목','금','토'];
-        const dow = DOW_KO[new Date(2026,3,d).getDay()];
-        const isWeekend = (new Date(2026,3,d).getDay()===0 || new Date(2026,3,d).getDay()===6);
-        if (isWeekend) {
+        const sm2 = selectedMonth || currentMonthInfo || { year: new Date().getFullYear() % 100, month: new Date().getMonth() + 1 };
+        const fy2 = sm2.year < 100 ? 2000 + sm2.year : sm2.year;
+        const dow = DOW_KO[new Date(fy2, sm2.month - 1, d).getDay()];
+        const dowNum = new Date(fy2, sm2.month - 1, d).getDay();
+        const isWeekend = (dowNum===0 || dowNum===6);
+        const holidayName2 = isHoliday(fy2, sm2.month, d);
+        if (isWeekend || holidayName2) {
           el.style.display='block';
-          el.innerHTML=`<div class="day-detail-card"><div class="day-detail-title">4월 ${d}일 (${dow})</div><div style="color:#aaa;font-size:13px;">주말입니다 🎉</div></div>`;
+          const label = holidayName2 ? `🎌 ${holidayName2}` : '주말입니다 🎉';
+          el.innerHTML=`<div class="day-detail-card"><div class="day-detail-title">${sm2.month}월 ${d}일 (${dow})</div><div style="color:#e53935;font-size:13px;font-weight:700;">${label}</div></div>`;
           return;
         }
         const data = scheduleData?.[String(d)] || [];
         if (!data.length) {
           el.style.display='block';
-          el.innerHTML=`<div class="day-detail-card"><div class="day-detail-title">4월 ${d}일 (${dow})</div><div style="color:#aaa;font-size:13px;">데이터 없음</div></div>`;
+          el.innerHTML=`<div class="day-detail-card"><div class="day-detail-title">${sm2.month}월 ${d}일 (${dow})</div><div style="color:#aaa;font-size:13px;">데이터 없음</div></div>`;
           return;
         }
         const statusLabel = s => {
@@ -653,13 +773,20 @@
 
         el.style.display='block';
         el.innerHTML=`<div class="day-detail-card">
-          <div class="day-detail-title">4월 ${d}일 (${dow})</div>
+          <div class="day-detail-title">${sm2.month}월 ${d}일 (${dow})</div>
           ${sec('🏠 재택',home,'chip-home')}
           ${sec('🌴 휴가',vacation,'chip-off',true)}
           ${special.length ? `<div class="day-section"><div class="day-section-label">📌 특이사항 ${special.length}명</div><div class="day-chips">${special.map(p=>`<span class="day-chip chip-special">${p.name} <span style="font-size:10px;opacity:.7">(${p.raw||p.status})</span></span>`).join('')}</div></div>` : ''}
           ${sec('🏢 오피스',office,'chip-office')}
         </div>`;
       }
+
+      // 초기 월 레이블 설정 (API 응답 전 현재 월 표시)
+      (function() {
+        const now = new Date();
+        const lbl = document.getElementById('calMonthLabel');
+        if (lbl) lbl.textContent = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}`;
+      })();
 
       loadCalendarData();
 
