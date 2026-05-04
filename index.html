@@ -412,19 +412,44 @@
         try {
           const res = await fetch(SHEETS_API);
           const json = await res.json();
-          if (!json.ok || !json.data || !Object.keys(json.data).length) return;
-          // 팀명 무관하게 이름으로 직접 매칭 (merged cell/팀명 불일치 문제 해결)
+          if (!json.ok) return;
+
+          // calendar[오늘날짜]로 전원 상태 읽기 (data는 merged cell 버그로 1명만 반환됨)
+          const todayDay = String(new Date().getDate());
+          const calToday = json.calendar && json.calendar[todayDay];
+
           const sheetStatusByName = {};
-          Object.values(json.data).forEach(members => {
-            members.forEach(m => { sheetStatusByName[m.name] = m; });
-          });
-          const statusMap2 = { home: 'remote', dayoff: 'vacation', office: 'office', special: 'special' };
+          if (calToday && calToday.length) {
+            // calendar 형식: { name, status: 'O'|'H'|'D'|..., raw }
+            const calMap = { 'O': 'office', 'H': 'home', 'D': 'dayoff' };
+            calToday.forEach(m => {
+              const raw = m.raw || m.status || '';
+              let st = 'office', note = '';
+              if (raw === 'H') { st = 'home'; }
+              else if (raw.charAt(0) === 'D') {
+                st = 'dayoff';
+                const nm = raw.match(/[/(]([^/)]+)[/)]/);
+                note = nm ? nm[1] : (raw.length > 1 ? raw.slice(1).trim() : '');
+              } else if (raw && raw !== 'O') { st = 'special'; note = raw; }
+              sheetStatusByName[m.name] = { status: st, timeNote: note };
+            });
+          } else if (json.data && Object.keys(json.data).length) {
+            // fallback: data 사용 (팀명 무관 이름 매칭)
+            const statusMap2 = { home: 'home', dayoff: 'dayoff', office: 'office', special: 'special' };
+            Object.values(json.data).forEach(members => {
+              members.forEach(m => { sheetStatusByName[m.name] = m; });
+            });
+          }
+
+          if (!Object.keys(sheetStatusByName).length) return;
+
+          const statusMap3 = { home: 'remote', dayoff: 'vacation', office: 'office', special: 'special' };
           teams.forEach(team => {
             state.members[team] = state.members[team].map(m => {
               const found = sheetStatusByName[m.name];
               if (!found) return m;
-              const mappedStatus = statusMap2[found.status] || 'office';
-              const mappedNote = found.status === 'special' ? found.timeNote : (found.timeNote || '');
+              const mappedStatus = statusMap3[found.status] || 'office';
+              const mappedNote = found.timeNote || '';
               return { ...m, status: mappedStatus, timeNote: mappedNote };
             });
           });
