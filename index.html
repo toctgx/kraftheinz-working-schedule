@@ -407,28 +407,29 @@
       const storageKey = 'khk-work-status-demo-v7';
       const SHEETS_API = 'https://script.google.com/macros/s/AKfycbxOZRlFwe1QBCRz_08w6_XCFtnvCVEGiZ2WbDfT8KYi9SCZhG4WsbC9X9BAaAoAllCd/exec';
 
-      // 구글 시트에서 데이터 경료
+      // API 이름 → 앱 내부 이름 변환
+      const normalizeApiName = (n) => {
+        if (n === 'John.P') return 'John';
+        if (n === 'Khan') return 'Kahn';
+        if (n === 'Lilly') return 'Dami';
+        return n;
+      };
+
+      // 구글 시트에서 오늘 상태 읽기 (캘린더와 동일한 방식 — localStorage 없이 직접 렌더)
+      let liveStatusByName = null; // null = 아직 로딩 전
+
       const syncFromSheets = async () => {
         try {
           const res = await fetch(SHEETS_API + '?v=' + Date.now());
           const json = await res.json();
           if (!json.ok) return;
 
-          // calendar[오늘날짜]로 전원 상태 읽기 (캘린더 페이지와 동일한 방식)
           const todayDay = String(new Date().getDate());
           const calToday = json.calendar && json.calendar[todayDay];
           if (!calToday || !calToday.length) return;
 
-          // API 이름 → 앱 내부 이름 변환 (임포트 코드와 동일)
-          const normalizeApiName = (n) => {
-            if (n === 'John.P') return 'John';
-            if (n === 'Khan') return 'Kahn';
-            if (n === 'Lilly') return 'Dami';
-            return n;
-          };
-
-          // Apps Script parseRaw 결과와 동일한 파싱
-          const sheetStatusByName = {};
+          const statusMap3 = { home: 'remote', dayoff: 'vacation', office: 'office', special: 'special' };
+          const newStatus = {};
           calToday.forEach(m => {
             const raw = (m.raw !== undefined && m.raw !== '') ? m.raw : (m.status || '');
             let st = 'office', note = '';
@@ -445,22 +446,10 @@
               st = 'special'; note = raw;
             }
             const appName = normalizeApiName(m.name);
-            sheetStatusByName[appName] = { status: st, timeNote: note };
+            newStatus[appName] = { status: statusMap3[st] || 'office', timeNote: note };
           });
 
-          if (!Object.keys(sheetStatusByName).length) return;
-
-          const statusMap3 = { home: 'remote', dayoff: 'vacation', office: 'office', special: 'special' };
-          teams.forEach(team => {
-            state.members[team] = state.members[team].map(m => {
-              const found = sheetStatusByName[m.name];
-              if (!found) return m;
-              const mappedStatus = statusMap3[found.status] || 'office';
-              const mappedNote = found.timeNote || '';
-              return { ...m, status: mappedStatus, timeNote: mappedNote };
-            });
-          });
-          persist();
+          liveStatusByName = newStatus;
           renderTeamTabs();
           renderTeamBoard();
         } catch(e) { console.warn('Sheets sync failed', e); }
@@ -967,8 +956,17 @@
       };
       const chipClass = { office: 'chip-office', remote: 'chip-remote', vacation: 'chip-vacation', 'half-am': 'chip-half', 'half-pm': 'chip-half', timeoff: 'chip-timeoff', fieldwork: 'chip-fieldwork', special: 'chip-special' };
       const renderTeamBoard = () => {
+        // 로딩 전이면 캐린더체럼 Loading 표시
+        if (!liveStatusByName) {
+          teamBoard.innerHTML = '<div style="text-align:center;padding:60px 0;color:#bbb;font-size:14px;font-weight:600;">Loading ...</div>';
+          return;
+        }
         const currentView = statusViews.find(view => view.key === currentTeam) || statusViews[0];
-        const members = teams.flatMap(team => state.members[team].map(member => ({ ...member, team }))).filter(currentView.match);
+        // liveStatusByName(구글 시트)을 우선, 없으면 state.members 폴백
+        const members = teams.flatMap(team => state.members[team].map(member => {
+          const live = liveStatusByName[member.name];
+          return live ? { ...member, ...live, team } : { ...member, team };
+        })).filter(currentView.match);
         const chipLabel = (member) => member.status === 'timeoff' && member.timeNote ? '반반차 ' + member.timeNote : member.status === 'fieldwork' ? '외근' : member.status === 'special' ? (member.timeNote || '기타') : member.timeNote ? member.timeNote : displayTeam(member.team);
         teamBoard.innerHTML = members.length ? `
           <div class="list-header">
